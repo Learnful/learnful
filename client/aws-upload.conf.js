@@ -12,7 +12,6 @@ module.exports = {
     "bower_components/purecss/build/pure-nr-min.css",
     "bower_components/codemirror/lib/codemirror.css",
     "bower_components/codemirror/addon/lint/lint.css",
-    "webfontkit/**",
     "altfire.js",
     "modal.js",
     "main.js",

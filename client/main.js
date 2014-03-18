@@ -283,7 +283,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           if (match) maxNumber = Math.max(maxNumber, parseInt(match[1]));
         });
         var tidbitRef = handles.draft.ref('tidbits').push(
-          {id: 't' + (maxNumber + 1), order: _.now() + user.data.clockSkew, purpose: 'advice'});
+          {id: 't' + (maxNumber + 1), order: user.now(), purpose: 'advice'});
         $scope.expandedTidbits[tidbitRef.name()] = true;
       };
 
@@ -340,7 +340,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           alert('This skill is already listed (may be archived).');
           return;
         }
-        var order = _.now() + user.data.clockSkew;
+        var order = user.now();
         var childRef = handles.draft.ref('children').push({frameKey: frameKey, order: order});
         handles.draft.ref('tidbits', frameKey).set(
           {id: frameKey, order: order, question: 'Why this?', purpose: 'transition'});
@@ -940,6 +940,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
     }
   };
 
+  self.now = function() {
+    return _.now() + self.data.clockSkew;
+  };
+
   return self;
 })
 
@@ -1100,7 +1104,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           stateScope.triggered[tidbitKey][responseKey] = {};
         }
         var responseState = stateScope.triggered[tidbitKey][responseKey];
-        responseState.lastTriggerTime = _.now();
+        responseState.lastTriggerTime = user.now();
         responseState.triggerCount = (responseState.triggerCount || 0) + 1;
       }
       handles.messages.ref().push({

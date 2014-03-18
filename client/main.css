@@ -277,10 +277,6 @@ input {
   padding-right: 5px;
 }
 
-.frame.explore .content, .frame.preview .content, .frame.explore .content input, .frame.preview .content textarea {
-  font-family: 'janda_everyday_casualregular', sans-serif;
-}
-
 .frame .section {
   margin: 3px 0 10px;
 }
