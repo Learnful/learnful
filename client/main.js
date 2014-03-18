@@ -968,7 +968,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         return frameKey;
       }
 
-      var createFrameLabelPrefix = '**Create**: ';
+      var createFrameLabelPrefix = '✦Create✦ ';
 
       $scope.matchFrames = function(term, callback) {
         fire.connect($scope, {
