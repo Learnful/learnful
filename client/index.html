@@ -1,0 +1,49 @@
+<!doctype html>
+<html ng-app="learnful">
+
+<head>
+  <title>Learnful</title>
+  <script src="https://code.jquery.com/jquery-2.1.0.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular-cookies.min.js"></script>
+  <script src="https://cdn.firebase.com/v0/firebase.js"></script>
+  <script src="https://cdn.firebase.com/v0/firebase-simple-login.js"></script>
+  <script src="libs/underscore-1.6.0-min.js"></script>
+  <script src="libs/jquery-ui-1.10.4.custom.min.js"></script>
+  <script src="libs/codemirror-compressed.js"></script>
+  <script src="bower_components/jquery-mousewheel/jquery.mousewheel.js"></script>
+  <script src="bower_components/jshint/dist/jshint.js"></script>
+  <script src="bower_components/Recorderjs/recorder.js"></script>
+  <!--
+  <script src="bower_components/codemirror/lib/codemirror.js"></script>
+  <script src="bower_components/codemirror/addon/lint/lint.js"></script>
+  <script src="bower_components/codemirror/mode/javascript/javascript.js"></script>
+  <script src="bower_components/codemirror/mode/xml/xml.js"></script>
+  <script src="bower_components/codemirror/mode/css/css.js"></script>
+  <script src="bower_components/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+  <script src="bower_components/codemirror/addon/fold/xml-fold.js"></script>
+  <script src="bower_components/codemirror/addon/edit/matchbrackets.js"></script>
+  <script src="bower_components/codemirror/addon/edit/matchtags.js"></script>
+  <script src="bower_components/codemirror/addon/lint/javascript-lint.js"></script>
+  -->
+  <script src="altfire.js"></script>
+  <script src="modal.js"></script>
+  <script src="main.js"></script>
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css"/>
+  <link rel="stylesheet" href="libs/ui-lightness/jquery-ui-1.10.4.custom.min.css"/>
+  <link rel="stylesheet" href="bower_components/purecss/build/pure-nr-min.css"/>
+  <link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css"/>
+  <link rel="stylesheet" href="bower_components/codemirror/addon/lint/lint.css"/>
+  <link rel="stylesheet" href="modal.css"/>
+  <link rel="stylesheet" href="webfontkit/stylesheet.css"/>
+  <link rel="stylesheet" href="main.css"/>
+</head>
+
+<body>
+  <div lf-arena="a1"></div>
+  <div modal-dialog="responseEditor" disable-backdrop-cancel="on">
+    <div ng-include="'partials/response_editor.html'"></div>
+  </div>
+</body>
+
+</html>

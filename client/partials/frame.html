@@ -1,0 +1,34 @@
+<div class="frame" ng-class="[mode, focused ? 'focused' : '']" ng-click="focus()"
+     ng-style="{top: layout.y + 'px', left: layout.x + 'px', width: layout.width + 'px', height: layout.height + 'px'}">
+  <div class="border-maker"></div>
+  <div class="corner-maker"></div>
+  <div class="main">
+    <div class="title" ng-include="'partials/frame_title_' + mode + '.html'"></div>
+    <div class="main-body">
+      <div class="content-wrapper">
+        <div class="content" ng-include="'partials/frame_' + mode + '.html'"></div>
+      </div>
+      <div class="sidebar">
+        <h5>
+          <span ng-show="mode === 'explore'">Chat</span>
+          <span ng-show="mode !== 'explore'">Editor chat</span>
+        </h5>
+        <div ng-if="mode === 'explore'" class="sidebar-content"
+             lf-chatroom frame-set="frames" frame-key="frameKey" presence="focused"
+             state-user-key="stateUserKey">
+        </div>
+        <div ng-if="mode !== 'explore'" class="sidebar-content"
+             lf-chatroom frame-set="drafts" frame-key="frameKey" presence="focused"
+             state-user-key="stateUserKey" preferred-author-key="stateUserKey">
+        </div>
+      </div>
+    </div>
+    <div class="footer" ng-include="'partials/frame_footer_' + mode + '.html'"></div>
+  </div>
+  <div class="controls left">
+    <span class="icon-button fa fa-times-circle" ng-show="mode === 'explore'" ng-click="hideFrame()" title="Remove frame from this workspace"></span>
+  </div>
+  <div class="controls right">
+    <span class="icon-button fa fa-pencil-square" ng-class="{on: mode === 'edit' || mode === 'preview'}" ng-click="toggleEdit()" title="Toggle edit mode"></span>
+  </div>
+</div>

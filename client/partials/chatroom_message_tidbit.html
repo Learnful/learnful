@@ -1,0 +1,28 @@
+<div ng-controller="lfTidbitMessage">
+  <div lf-avatar="response.authorKey" class="tidbit-avatar"></div>
+  <div ng-if="response.audio">
+    <audio lf-director-media="{{message.tidbitKey}}" controls
+           ng-src="{{response.audio.src}}"></audio>
+    <div style="float:right">
+      <a href="" ng-click="sendTidbit(message.tidbitKey, true)" ng-show="countAlternativeResponses()">{{countAlternativeResponses()}} alt</a>
+      <span ng-show="frameSet === 'frames'" class="icon-button fa fa-heart vote" ng-click="vote()"
+            ng-class="{on: responseVote}" title="This was helpful!"></span>
+      <span class="private fa fa-eye-slash" title="This message is prerecorded and only you can see it."></span>
+    </div>
+    <details>
+      <summary>{{tidbit.question || 'transcript'}}</summary>
+      <p>{{response.text}}</p>
+    </details>
+  </div>
+  <div ng-if="!response.audio &amp;&amp; !response.video">
+    <p>{{tidbit.question}}</p>
+    <p>
+      {{response.text}}
+      <a href="" ng-click="sendTidbit(message.tidbitKey, true)" ng-show="countAlternativeResponses()">{{countAlternativeResponses()}} alt</a>
+      <span ng-show="frameSet === 'frames'" class="icon-button fa fa-heart vote" ng-click="vote()"
+            ng-class="{on: responseVote}" title="This was helpful!"></span>
+      <span class="private fa fa-eye-slash" title="This message is prerecorded and only you can see it."></span>
+    </p>
+  </div>
+  <div class="end-of-message"></div>
+</div>

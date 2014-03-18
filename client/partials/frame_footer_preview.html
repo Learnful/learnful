@@ -1,0 +1,11 @@
+<div class="sequencer">
+  <form style="display: inline">
+    <button class="pure-button pure-radio" ng-class="{on: mode === 'edit'}" ng-click="switchMode('edit')">
+      <input type="radio" ng-model="mode" value="edit"/> Edit
+    </button>
+    <button class="pure-button pure-radio" ng-class="{on: mode === 'preview'}" ng-click="switchMode('preview')">
+      <input type="radio" ng-model="mode" value="preview"/> Preview
+    </button>
+  </form>
+  <button class="pure-button pure-button-primary" ng-click="publish()" ng-disabled="!isDraftChanged()">Publish</button>
+</div>

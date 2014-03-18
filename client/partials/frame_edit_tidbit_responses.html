@@ -1,0 +1,40 @@
+<div class="response" ng-repeat="response in getSortedDraftResponses(tidbit.$key)">
+  <span lf-avatar="response.authorKey" format="long"></span>:
+  <span class="summary">
+    <span ng-if="response.video">{{response.video.duration | duration}} video</span>
+    <span ng-if="response.audio">{{response.audio.duration | duration}} audio</span>
+    <span ng-if="response.image">{{response.image.width}}x{{response.image.height}} image</span>
+    <span ng-if="response.text">{{response.text | wordCount}} words</span>
+    <span ng-if="votes.tidbits[tidbit.$key].responses[response.$key]">
+      <span ng-pluralize
+            count="votes.tidbits[tidbit.$key].responses[response.$key].triggerCount"
+            when="{'0': 'no views', 'one': '1 view', 'other': '{} unique views'}">
+      </span>
+      <span>
+        ({{(votes.tidbits[tidbit.$key].responses[response.$key].voteCount || 0) /
+        votes.tidbits[tidbit.$key].responses[response.$key].triggerCount * 100 | number: 0}}%
+        <span class="fa fa-heart-o"></span>)
+      </span>
+    </span>
+  </span>
+  <span class="pure-button small-button" ng-click="editResponse(tidbit.$key, response.$key)">
+    <span ng-show="response.authorKey === user.currentUserKey">Edit</span>
+    <span ng-hide="response.authorKey === user.currentUserKey">View</span>
+  </span>
+  &nbsp;
+  <span class="pure-button small-button">
+    <span ng-show="response.archived" ng-click="response.archived = false">Unarchive</span>
+    <span ng-hide="response.archived">
+      <span ng-show="votes.tidbits[tidbit.$key].responses[response.$key].triggerCount"
+            ng-click="response.archived = true">Archive</span>
+      <span ng-hide="votes.tidbits[tidbit.$key].responses[response.$key].triggerCount"
+            ng-click="deleteResponse(tidbit.$key, response.$key)">Delete</span>
+    </span>
+  </span>
+</div>
+<div class="response">
+  <span class="summary"></span>
+  <span class="pure-button small-button" ng-click="addResponse(tidbit.$key)">
+    Add snippet
+  </span>
+</div>

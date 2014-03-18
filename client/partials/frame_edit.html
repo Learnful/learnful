@@ -1,0 +1,112 @@
+<h5>Content</h5>
+<div class="section" lf-code-editor ng-model="draft.content" mode="htmlmixed"></div>
+<h5>Analyzer</h5>
+<div class="section" lf-code-editor ng-model="draft.analyzerCode" mode="javascript"></div>
+<h5>
+  Feedback
+  <label style="float: right; font-size: 80%;">
+    <input type="checkbox" ng-model="showArchived.tidbits" style="vertical-align: top"/>
+    Show archived
+  </label>
+</h5>
+<div class="section">
+  <table class="tidbit-table">
+    <tbody>
+      <tr>
+        <th>ID</th>
+        <th title="Findable?" style="width: 20px">F?</th>
+        <th>Question</th>
+        <th title="Sustain"><span class="fa fa-clock-o"></span></th>
+        <th>Trigger</th>
+        <th title="Responses">Resp.</th>
+        <th title="Archived?" style="width: 20px">A?</th>
+      </tr>
+      <tr ng-repeat-start="tidbit in getSortedDraftTidbits('advice')"
+          ng-click="expandedTidbits[tidbit.$key] = !expandedTidbits[tidbit.$key]" class="tidbit-row"
+          ng-class="{'tidbit-row-expanded': expandedTidbits[tidbit.$key]}">
+        <td><div>{{tidbit.id}}</div></td>
+        <td><div ng-show="tidbit.findable" class="fa fa-search"></div></td>
+        <td><div>{{tidbit.question}}</div></td>
+        <td><div ng-show="tidbit.sustain">{{tidbit.sustain}}s</div></td>
+        <td><div>{{tidbit.trigger}}</div></td>
+        <td>
+          <div>
+            <span ng-repeat="response in getSortedDraftResponses(tidbit.$key)"
+                  lf-avatar="response.authorKey">
+            </span>
+          </div>
+        </td>
+        <td><div ng-show="tidbit.archived" class="fa fa-archive"></div></td>
+      </tr>
+      <tr ng-repeat-end ng-if="expandedTidbits[tidbit.$key]">
+        <td colspan="7" ng-include="'partials/frame_edit_tidbit.html'"></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="pure-button small-button" ng-click="addTidbit()">Add tidbit</span>
+</div>
+<h5>
+  Underlying skills
+  <label style="float: right; font-size: 80%;">
+    <input type="checkbox" ng-model="showArchived.children" style="vertical-align: top"/>
+    Show archived
+  </label>
+</h5>
+<div class="section">
+  <table class="tidbit-table">
+    <tbody>
+      <tr>
+        <th style="width: 50px"></th>
+        <th>Title</th>
+        <th>Transitions</th>
+        <th title="Archived?" style="width: 20px">A?</th>
+        <th style="width: 75px"></th>
+      </tr>
+      <tr ng-repeat-start="child in getSortedDraftChildren()"
+          ng-init="tidbit = draft.tidbits[child.frameKey]"
+          ng-click="expandedChildren[child.$key] = !expandedChildren[child.$key]"
+          ng-class="{'tidbit-row-expanded': expandedChildren[child.$key]}" class="tidbit-row">
+        <td style="font-size: 100%">
+          <span class="fa fa-chevron-circle-up icon-button" ng-disabled="$first"
+                  ng-click="moveChild($index, -1); $event.stopPropagation()"></span>
+          <span class="fa fa-chevron-circle-down icon-button" ng-disabled="$last"
+                  ng-click="moveChild($index, 1); $event.stopPropagation()"></span>
+        </td>
+        <td>{{draftChildren[child.frameKey].title}}</td>
+        <td>
+          <div>
+            <span ng-repeat="response in getSortedDraftResponses(tidbit.$key)"
+                  lf-avatar="response.authorKey">
+            </span>
+          </div>
+        </td>
+        <td><div ng-show="child.archived" class="fa fa-archive"></div></td>
+        <td>
+          <div class="pure-button small-button">
+            <div ng-show="child.archived"
+                 ng-click="archiveChild(child.$key, false); $event.stopPropagation()">
+              Unarchive
+            </div>
+            <div ng-hide="child.archived">
+              <div ng-show="isChildPublished(child.$key)"
+                   ng-click="archiveChild(child.$key, true); $event.stopPropagation()">
+                Archive
+              </div>
+              <div ng-hide="isChildPublished(child.$key)"
+                   ng-click="deleteChild(child.$key, child.frameKey); $event.stopPropagation()">
+                Remove
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr ng-repeat-end ng-if="expandedChildren[child.$key]">
+        <td colspan="5">
+          <div class="tidbit-details" ng-include="'partials/frame_edit_tidbit_responses.html'">
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div lf-frame-finder="addChild(frameKey)" placeholder="Add underlying skill"></div>
+</div>

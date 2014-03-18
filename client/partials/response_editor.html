@@ -1,0 +1,84 @@
+<div class="response-editor" ng-controller="lfResponseEditor">
+  <h3 style="text-align: center; margin-top: 0">
+    Snippet <span ng-show="isEditable()">Editor</span><span ng-hide="isEditable()">Viewer</span>
+  </h3>
+
+  <div class="tidbit-details" ng-if="getTidbit().purpose === 'advice'">
+    <label style="width: 20%">
+      Tidbit ID
+      <span>{{getTidbit().id}}</span>
+    </label><label ng-show="getTidbit().question" style="width: 79%; margin-left: 1%;">
+      Question
+      <span>{{getTidbit().question}}</span>
+    </label>
+    <label ng-show="getTidbit().trigger" style="width: 100%">
+      Trigger
+      <pre>{{getTidbit().trigger}}</pre>
+    </label>
+  </div>
+
+  <form ng-show="isEditable()" class="pure-form pure-form-aligned">
+    <fieldset>
+      <div class="pure-control-group">
+        <label>Microphone:</label>
+        <select ng-model="settings.audioSourceId"
+                ng-options="source.id as source.label for source in sourceInfos.audio"></select>
+      </div>
+      <div class="pure-control-group">
+        <label>Camera:</label>
+        <select ng-model="settings.videoSourceId"
+                ng-options="source.id as source.label for source in sourceInfos.video"></select>
+      </div>
+    </fieldset>
+  </form>
+
+  <h4>Audio</h4>
+  <button class="pure-button small-button"
+          ng-disabled="!isEditable() || !settings.audioSourceId || response.video"
+          ng-click="recordAudio()">
+    <span class="fa record-indicator"
+          ng-class="{'fa-circle': recording.audio, 'fa-circle-o': !recording.audio}"></span>
+    Record
+  </button>
+  <button class="pure-button small-button" ng-disabled="!isEditable() || response.video">Upload</button>
+  <button class="pure-button small-button" ng-disabled="!isEditable() || !response.audio"
+          ng-click="response.audio = null">Remove</button>
+  <audio style="vertical-align: bottom" controls ng-src="{{response.audio.src}}"
+         ng-style="{visibility: response.audio ? 'visible' : 'hidden'}"></audio>
+
+  <h4>Video</h4>
+  <button class="pure-button small-button"
+          ng-disabled="!isEditable() || !settings.videoSourceId || response.audio || response.image">
+    <span class="fa record-indicator"
+          ng-class="{'fa-circle': recording.video, 'fa-circle-o': !recording.video}"></span>
+    Record
+  </button>
+  <button class="pure-button small-button"
+          ng-disabled="!isEditable() || response.audio || response.image">Upload</button>
+  <button class="pure-button small-button"
+          ng-disabled="!isEditable() || !response.video" ng-click="response.video = null">Remove</button>
+  <video style="display: block" ng-show="response.video" ng-src="{{response.video.src}}"></video>
+
+  <h4>Image</h4>
+  <button class="pure-button small-button" ng-disabled="!isEditable() || response.video">Draw</button>
+  <button class="pure-button small-button" ng-disabled="!isEditable() || !settings.videoSourceId || response.video">Capture</button>
+  <button class="pure-button small-button" ng-disabled="!isEditable() || response.video">Upload</button>
+  <button class="pure-button small-button"
+          ng-disabled="!isEditable() || !response.image" ng-click="response.image = null">Remove</button>
+  <img style="display: block" ng-show="response.image" ng-src="{{response.image.src}}" style="max-width: 200px; max-height: 100px;"/>
+
+  <h4>
+    <span ng-show="response.audio || response.video">Transcript:</span>
+    <span ng-hide="response.audio || response.video">Text:</span>
+  </h4>
+  <div lf-code-editor ng-model="response.text" class="proportional-font" ng-disabled="!isEditable()"></div>
+
+  <div style="float: left; margin-top: 2.5em;" ng-show="mediaUploadProgress">
+    Uploading media... <progress value="{{mediaUploadProgress.loaded}}" max="{{mediaUploadProgress.total}}"></progress>
+  </div>
+  <div class="dialog-buttons">
+    <button class="pure-button pure-button-primary" ng-show="isEditable()" ng-click="save()">Save</button>
+    <button class="pure-button" ng-show="isEditable()" ng-click="cancel()">Cancel</button>
+    <button class="pure-button" ng-hide="isEditable()" ng-click="cancel()">Close</button>
+  </div>
+</div>

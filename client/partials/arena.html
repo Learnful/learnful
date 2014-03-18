@@ -1,0 +1,26 @@
+<div class="arena">
+  <div class="viewport" ng-style="{top: transform.offset.top + 'px', left: transform.offset.left + 'px'}">
+    <div class="viewport-handle"></div>
+    <div class="viewport-scale" ng-style="{'-webkit-transform': 'scale(' + transform.scale + ')', 'transform': 'scale(' + transform.scale + ')', top: transform.scaleOffset.top + 'px', left: transform.scaleOffset.left + 'px'}">
+      <div ng-repeat="(frameKey, layout) in layout" ng-click="focus(frameKey)" lf-frame="frameKey"
+           state-user-key="arena.ownerKey || user.currentUserKey" layout="layout"
+           focused="focusedFrameKey === frameKey">
+      </div>
+    </div>
+  </div>
+  <div class="infostrip">
+    <img src="http://placehold.it/200x40" alt="Learnful" class="logo"/>
+    <div lf-frame-finder="focus(frameKey)" placeholder="What do you want to learn or teach?"></div>
+    <span class="goal">
+      <span ng-if="arena.rootFrameKey">
+        Goal:
+        <span lf-completion="arena.rootFrameKey" state-user-key="arena.ownerKey || user.currentUserKey" control="readonly"></span>
+        <span class="title">{{rootFrameCore.title}}</span>
+      </span>
+      <span ng-if="arena.ownerKey &amp;&amp; user.currentUserKey !== arena.ownerKey">
+        (for <span lf-avatar="arena.ownerKey" format="long"></span>)
+      </span>
+    </span>
+    <div class="current-user" lf-avatar="user.currentUserKey" format="long"></div>
+  </div>
+</div>

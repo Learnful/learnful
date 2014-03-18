@@ -1,0 +1,8 @@
+<span ng-switch="getCompletionLevel()" class="completion"
+      ng-class="{'icon-button': control === 'mutable', dimmed: control === 'static'}"
+      tooltip="{{control === 'mutable' ? (completed ? 'Mark as incomplete' : 'Mark as complete') : ''}}"
+      ng-click="toggleCompletion()">
+  <span ng-switch-when="0" class="fa fa-square-o"></span>
+  <span ng-switch-when="1" class="fa fa-check-square-o"></span>
+  <span ng-switch-when="2" class="fa fa-check-square"></span>
+</span>

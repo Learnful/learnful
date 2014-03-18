@@ -1,0 +1,41 @@
+<div class="tidbit-details">
+
+  <label style="width: 50%">
+    ID
+    <input ng-model="tidbit.id"
+           ng-disabled="isTidbitPublished(tidbit.$key) || draft.tidbits[tidbit.$key].responses"/>
+  </label>
+  <div class="pure-button small-button remove-tidbit">
+    <div ng-show="tidbit.archived" ng-click="tidbit.archived = false">Unarchive tidbit</div>
+    <div ng-hide="tidbit.archived">
+      <div ng-show="isTidbitPublished(tidbit.$key)" ng-click="tidbit.archived = true">
+        Archive tidbit
+      </div>
+      <div ng-hide="isTidbitPublished(tidbit.$key)" ng-click="deleteTidbit(tidbit.$key)">
+        Delete tidbit
+      </div>
+    </div>
+  </div>
+
+  <label style="width: 85%">
+    Question
+    <div lf-code-editor ng-model="tidbit.question" class="proportional-font"></div>
+  </label><label style="width: 14%; margin-left: 1%;" title="Whether this tidbit should be findable via chat autocompletion.">
+    Findable
+    <input type="checkbox" ng-model="tidbit.findable"/>
+  </label>
+
+  <label style="width: 85%">
+    Trigger
+    <div lf-code-editor ng-model="tidbit.trigger" mode="javascript-expression"></div>
+  </label><label style="width: 14%; margin-left: 1%;" title="How many seconds the condition must hold for before the tidbit is triggered.">
+    Sustain
+    <input type="number" ng-model="tidbit.sustain"/>
+  </label>
+
+  <label style="width: 100%">
+    Responses
+    <div ng-include="'partials/frame_edit_tidbit_responses.html'"></div>
+    </div>
+  </label>
+</div>
