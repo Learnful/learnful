@@ -175,6 +175,7 @@ input {
 
 .arena .infostrip .current-user {
   float: right;
+  margin-right: 10px;
 }
 
 .frame {
