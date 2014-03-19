@@ -15,6 +15,7 @@
     <div class="current-user" lf-avatar="user.currentUserKey" format="long"></div>
   </div>
   <div class="viewport" ng-style="viewportStyle">
+    <canvas class="frame-connections"></canvas>
     <div ng-repeat="(frameKey, layout) in layout" class="frame-wrapper"
          ng-class="{focused: focusedFrameKey === frameKey}"
          ng-style="frameWrapperStyles[frameKey]">

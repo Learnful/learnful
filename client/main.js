@@ -48,6 +48,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       var handles = fire.connect($scope, {
         arena: {bind: 'arenas/{{arenaKey}}/core'},
         layout: {bind: 'arenas/{{arenaKey}}/layout'},
+        graph: {pull: 'graph/#', viaKeys: 'arenas/{{arenaKey}}/layout'},
         rootFrameCore: {pull: 'frames/#/core', via: 'arenas/{{arenaKey}}/core/rootFrameKey'},
       });
 
@@ -76,14 +77,20 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       this.hideFrame = $scope.hideFrame = function(frameKey) {
         $scope.layout[frameKey] = null;
+        if ($scope.focusedFrameKey === frameKey) focus();
       };
     },
 
     link: function($scope, element, attrs, controller) {
 
-      var X_LAYOUT_STEP = 800, X_ZOOMOUT_SIZE = 600, Y_LAYOUT_STEP = 800, Y_ZOOMOUT_SIZE = 600;
+      var SIZE_X = 600, STEP_X = SIZE_X * 1.33, HALF_X = SIZE_X / 2;
+      var SIZE_Y = 400, STEP_Y = SIZE_Y * 1.33, HALF_Y = SIZE_Y / 2;
+      var MARGIN_X = 30, MARGIN_Y = 50;
+      var CURVE_MARGIN_X = (STEP_X - SIZE_X) / 1.2, CURVE_MARGIN_Y = (STEP_Y - SIZE_Y) / 1.2;
       var viewport = element.find('.viewport');
       var bounds;
+      var canvas = element.find('.frame-connections').get(0);
+      var ctx = canvas.getContext('2d');
 
       function computeLayoutBounds()  {
         var b = {minX: 0, maxX: 0, minY: 0, maxY: 0};
@@ -93,24 +100,26 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
             minY: Math.min(b.minY, a.y), maxY: Math.max(b.maxY, a.y)
           };
         });
+        b.spanX = b.maxX - b.minX;
+        b.spanY = b.maxY - b.minY;
+        b.centerX = b.spanX / 2 + b.minX;
+        b.centerY = b.spanY / 2 + b.minY;
         return b;
       }
 
       function computeViewportStyle() {
         var wx = viewport.innerWidth(), wy = viewport.innerHeight();
         if ($scope.view === 'overview') {
-          var spanX = bounds.maxX - bounds.minX, spanY = bounds.maxY - bounds.minY;
-          var cx = spanX / 2 + bounds.minX, cy = spanY / 2 + bounds.minY;
-          var scaleX = Math.min(0.75, wx / (spanX * X_LAYOUT_STEP + X_ZOOMOUT_SIZE + 30));
-          var scaleY = Math.min(0.75, wy / (spanY * Y_LAYOUT_STEP + Y_ZOOMOUT_SIZE + 30));
+          var scaleX = Math.min(0.75, wx / (bounds.spanX * STEP_X + SIZE_X + MARGIN_X * 2));
+          var scaleY = Math.min(0.75, wy / (bounds.spanY * STEP_Y + SIZE_Y + MARGIN_Y * 2));
           var transformOrigin = $interpolate('{{cx}}px {{cy}}px')({
-            cx: cx * X_LAYOUT_STEP,
-            cy: cy * Y_LAYOUT_STEP
+            cx: bounds.centerX * STEP_X,
+            cy: bounds.centerY * STEP_Y
           });
           var transform = $interpolate('translate({{tx}}px,{{ty}}px) scale({{scale}})')({
             scale: Math.min(scaleX, scaleY),
-            tx: -cx * X_LAYOUT_STEP + wx / 2,
-            ty: -cy * Y_LAYOUT_STEP + wy / 2
+            tx: -bounds.centerX * STEP_X + wx / 2,
+            ty: -bounds.centerY * STEP_Y + wy / 2
           });
           return {
             'transform-origin': transformOrigin, '-webkit-transform-origin': transformOrigin,
@@ -119,8 +128,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         } else if ($scope.view === 'detail') {
           var frameLayout = $scope.layout[$scope.focusedFrameKey];
           var transform = $interpolate('translate({{tx}}px,{{ty}}px) scale(1)')({
-            tx: -frameLayout.x * X_LAYOUT_STEP + wx / 2,
-            ty: -frameLayout.y * Y_LAYOUT_STEP + wy / 2
+            tx: -frameLayout.x * STEP_X + wx / 2,
+            ty: -frameLayout.y * STEP_Y + wy / 2
           });
           return {
             // 'transform-origin': transformOrigin, '-webkit-transform-origin': transformOrigin,
@@ -131,10 +140,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       function computeFrameWrapperStyle(frameKey, layout) {
         var wx = viewport.innerWidth(), wy = viewport.innerHeight();
-        var cx = layout.x * X_LAYOUT_STEP, cy = layout.y * Y_LAYOUT_STEP;
+        var cx = layout.x * STEP_X, cy = layout.y * STEP_Y;
         if (frameKey === $scope.focusedFrameKey) {
-          var width = Math.min(1000, wx - 30);
-          var height = wy - 30;
+          var width = Math.min(1000, wx - MARGIN_X * 2);
+          var height = wy - MARGIN_Y * 2;
           var transform = $interpolate('translate({{tx}}px,{{ty}}px)')({
             tx: cx - width / 2, ty: cy - height / 2
           });
@@ -144,17 +153,66 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           };
         } else {
           var transform = $interpolate('translate({{tx}}px,{{ty}}px)')({
-            tx: cx - X_ZOOMOUT_SIZE / 2, ty: cy - Y_ZOOMOUT_SIZE / 2
+            tx: cx - HALF_X, ty: cy - HALF_Y
           });
           return {
             transform: transform, '-webkit-transform': transform,
-            width: X_ZOOMOUT_SIZE, height: Y_ZOOMOUT_SIZE
+            width: SIZE_X, height: SIZE_Y
           };
         }
       }
 
-      function updateLayout() {
-        bounds = computeLayoutBounds();
+      function drawLink(sourceFrameLayout, destFrameLayout) {
+        ctx.beginPath();
+        ctx.moveTo(sourceFrameLayout.x * STEP_X, sourceFrameLayout.y * STEP_Y + HALF_Y);
+        ctx.bezierCurveTo(
+          sourceFrameLayout.x * STEP_X, sourceFrameLayout.y * STEP_Y + HALF_Y + CURVE_MARGIN_Y,
+          destFrameLayout.x * STEP_X, destFrameLayout.y * STEP_Y - HALF_Y - CURVE_MARGIN_Y - 10,
+          destFrameLayout.x * STEP_X, destFrameLayout.y * STEP_Y - HALF_Y - 10
+        );
+        ctx.stroke();
+      }
+
+      function drawConnections() {
+        var offsetX = bounds.minX * STEP_X - HALF_X - MARGIN_X;
+        var offsetY = bounds.minY * STEP_Y - HALF_Y - MARGIN_Y;
+        canvas.width = bounds.spanX * STEP_X + SIZE_X + 2 * MARGIN_X;
+        canvas.height = bounds.spanY * STEP_Y + SIZE_Y + 2 * MARGIN_Y;
+        canvas.style.left = offsetX + 'px';
+        canvas.style.top = offsetY + 'px';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.translate(-offsetX, -offsetY);
+        ctx.lineWidth = 50;
+        ctx.strokeStyle = 'rgba(0,180,0,0.05)';
+        _.each($scope.graph, function(node, frameKey) {
+          if (!node) return;
+          var frameLayout = $scope.layout[frameKey];
+          if (!frameLayout) return;
+          _.each(node.childKeys, function(unused, childKey) {
+            var childLayout = $scope.layout[childKey];
+            if (!childLayout) return;
+            drawLink(frameLayout, childLayout);
+          });
+          _.each(node.descendantKeys, function(unused, descendantKey) {
+            var descendantLayout = $scope.layout[descendantKey];
+            if (!descendantLayout || descendantKey === frameKey ||
+                node.childKeys && node.childKeys[descendantKey] ||
+                _.some(node.childKeys, function(unused, childKey) {
+                  return $scope.graph[childKey] && $scope.graph[childKey].descendantKeys &&
+                    $scope.graph[childKey].descendantKeys[descendantKey];
+                }
+            )) {
+              return;
+            }
+            ctx.save();
+            ctx.setLineDash([200, 20]);
+            drawLink(frameLayout, descendantLayout);
+            ctx.restore();
+          });
+        });
+      }
+
+      function updateView() {
         $scope.viewportStyle = computeViewportStyle();
         $scope.frameWrapperStyles = {};
         _.each($scope.layout, function(layout, frameKey) {
@@ -162,8 +220,16 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         });
       }
 
-      $scope.$watch('[layout, view, focusedFrameKey]', updateLayout, true);
-      $(window).on('resize', _.throttle(function() {$timeout(updateLayout);}, 400));
+      function updateLayout() {
+        bounds = computeLayoutBounds();
+        updateView();
+        drawConnections();
+      }
+
+      $scope.$watch('layout', updateLayout, true);
+      $scope.$watch('[view, focusedFrameKey]', updateView, true);
+      $scope.$watch('graph', drawConnections, true);
+      $(window).on('resize', _.throttle(function() {$timeout(updateView);}, 400));
     }
   };
 })
@@ -293,7 +359,9 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         zeroDraftTidbitOrders();
         $scope.frame = angular.copy($scope.draft);
         var childrenKeys = {};
-        _.each($scope.draft.children, function(child) {childrenKeys[child.frameKey] = 1;});
+        _.each($scope.draft.children, function(child) {
+          if (!child.archived) childrenKeys[child.frameKey] = 1;
+        });
         fire.ref($scope, 'graph/{{frameKey}}/childKeys').set(childrenKeys);
         $scope.toggleEdit();
       };
