@@ -36,20 +36,19 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
   ]);
 })
 
-.directive('lfArena', function() {
+.directive('lfArena', function($timeout, $interpolate) {
   return {
     templateUrl: 'partials/arena.html',
     scope: {arenaKey: '@lfArena'},
     controller: function($scope, fire, user, search) {
       $scope.user = user;
       $scope.focusedFrameKey = null;
+      $scope.view = 'overview';  // choices: overview, detail
+
       var handles = fire.connect($scope, {
         arena: {bind: 'arenas/{{arenaKey}}/core'},
         layout: {bind: 'arenas/{{arenaKey}}/layout'},
-        transform: {bind: 'arenas/{{arenaKey}}/transforms/{{user.currentUserKey}}'},
         rootFrameCore: {pull: 'frames/#/core', via: 'arenas/{{arenaKey}}/core/rootFrameKey'},
-        frames: {noop: 'frames'},
-        drafts: {noop: 'drafts'}
       });
 
       handles.layout.ready().then(function() {
@@ -58,17 +57,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         }
       });
 
-      handles.transform.ready().then(function() {
-        if (!$scope.transform) {
-          $scope.transform = {
-            scale: 1, offset: {left: 0, top: 0}, scaleOffset: {left: 0, top: 0}
-          };
-        }
-      });
-
       $scope.$on('focused', function(event, frameKey) {$scope.focus(frameKey);});
       $scope.focus = function(frameKey) {
         $scope.focusedFrameKey = frameKey;
+        $scope.view = frameKey ? 'detail' : 'overview';
       };
 
       $scope.$on('frameAdded', function(event, frameKey) {
@@ -86,30 +78,92 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         $scope.layout[frameKey] = null;
       };
     },
+
     link: function($scope, element, attrs, controller) {
 
-      element.find('.arena .viewport').draggable({
-        cursor: '-webkit-grabbing', handle: '.viewport-handle', cancel: '.frame',
-        stop: function(event, ui) {
-          $scope.$apply(function() {
-            $scope.transform.offset = ui.position;
-          });
-        }
-      });
-      element.find('.arena .viewport-handle').mousewheel(function(event) {
-        event.preventDefault();
-        $scope.$apply(function() {
-          var oldScale = $scope.transform.scale;
-          var newScale = $scope.transform.scale = Math.max(0.3, Math.min(
-            1, $scope.transform.scale * Math.pow(1.2, event.deltaY)));
-          $scope.transform.scaleOffset = {
-            left: $scope.transform.scaleOffset.left +
-              (event.pageX - $scope.transform.offset.left) * (oldScale - newScale),
-            top: $scope.transform.scaleOffset.top +
-              (event.pageY - $scope.transform.offset.top) * (oldScale - newScale)
+      var X_LAYOUT_STEP = 800, X_ZOOMOUT_SIZE = 600, Y_LAYOUT_STEP = 800, Y_ZOOMOUT_SIZE = 600;
+      var viewport = element.find('.viewport');
+      var bounds;
+
+      function computeLayoutBounds()  {
+        var b = {minX: 0, maxX: 0, minY: 0, maxY: 0};
+        _.each($scope.layout, function(a) {
+          b = {
+            minX: Math.min(b.minX, a.x), maxX: Math.max(b.maxX, a.x),
+            minY: Math.min(b.minY, a.y), maxY: Math.max(b.maxY, a.y)
           };
         });
-      });
+        return b;
+      }
+
+      function computeViewportStyle() {
+        var wx = viewport.innerWidth(), wy = viewport.innerHeight();
+        if ($scope.view === 'overview') {
+          var spanX = bounds.maxX - bounds.minX, spanY = bounds.maxY - bounds.minY;
+          var cx = spanX / 2 + bounds.minX, cy = spanY / 2 + bounds.minY;
+          var scaleX = Math.min(0.75, wx / (spanX * X_LAYOUT_STEP + X_ZOOMOUT_SIZE + 30));
+          var scaleY = Math.min(0.75, wy / (spanY * Y_LAYOUT_STEP + Y_ZOOMOUT_SIZE + 30));
+          var transformOrigin = $interpolate('{{cx}}px {{cy}}px')({
+            cx: cx * X_LAYOUT_STEP,
+            cy: cy * Y_LAYOUT_STEP
+          });
+          var transform = $interpolate('translate({{tx}}px,{{ty}}px) scale({{scale}})')({
+            scale: Math.min(scaleX, scaleY),
+            tx: -cx * X_LAYOUT_STEP + wx / 2,
+            ty: -cy * Y_LAYOUT_STEP + wy / 2
+          });
+          return {
+            'transform-origin': transformOrigin, '-webkit-transform-origin': transformOrigin,
+            transform: transform, '-webkit-transform': transform,
+          };
+        } else if ($scope.view === 'detail') {
+          var frameLayout = $scope.layout[$scope.focusedFrameKey];
+          var transform = $interpolate('translate({{tx}}px,{{ty}}px) scale(1)')({
+            tx: -frameLayout.x * X_LAYOUT_STEP + wx / 2,
+            ty: -frameLayout.y * Y_LAYOUT_STEP + wy / 2
+          });
+          return {
+            // 'transform-origin': transformOrigin, '-webkit-transform-origin': transformOrigin,
+            transform: transform, '-webkit-transform': transform,
+          };
+        }
+      }
+
+      function computeFrameWrapperStyle(frameKey, layout) {
+        var wx = viewport.innerWidth(), wy = viewport.innerHeight();
+        var cx = layout.x * X_LAYOUT_STEP, cy = layout.y * Y_LAYOUT_STEP;
+        if (frameKey === $scope.focusedFrameKey) {
+          var width = Math.min(1000, wx - 30);
+          var height = wy - 30;
+          var transform = $interpolate('translate({{tx}}px,{{ty}}px)')({
+            tx: cx - width / 2, ty: cy - height / 2
+          });
+          return {
+            transform: transform, '-webkit-transform': transform,
+            width: width, height: height
+          };
+        } else {
+          var transform = $interpolate('translate({{tx}}px,{{ty}}px)')({
+            tx: cx - X_ZOOMOUT_SIZE / 2, ty: cy - Y_ZOOMOUT_SIZE / 2
+          });
+          return {
+            transform: transform, '-webkit-transform': transform,
+            width: X_ZOOMOUT_SIZE, height: Y_ZOOMOUT_SIZE
+          };
+        }
+      }
+
+      function updateLayout() {
+        bounds = computeLayoutBounds();
+        $scope.viewportStyle = computeViewportStyle();
+        $scope.frameWrapperStyles = {};
+        _.each($scope.layout, function(layout, frameKey) {
+          $scope.frameWrapperStyles[frameKey] = computeFrameWrapperStyle(frameKey, layout);
+        });
+      }
+
+      $scope.$watch('[layout, view, focusedFrameKey]', updateLayout, true);
+      $(window).on('resize', _.throttle(function() {$timeout(updateLayout);}, 400));
     }
   };
 })
@@ -117,10 +171,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 .directive('lfFrame', function()  {
   return {
     templateUrl: 'partials/frame.html',
-    scope: {frameKey: '=lfFrame', stateUserKey: '=', layout: '=', focused: '='},
+    scope: {frameKey: '=lfFrame', stateUserKey: '=', focused: '='},
     require: '^?lfArena',
     controller: function($scope, $timeout, fire, modal, user, guidance, director) {
-      $scope.mode = 'explore';  // one of: explore, edit, diff, preview
+      $scope.mode = 'explore';  // one of: explore, edit, preview
       $scope.user = user;
       $scope.expandedTidbits = {};
       $scope.expandedChildren = {};
@@ -173,10 +227,6 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       $scope.$on('trigger', function(event, args) {
         $scope.trigger(args.tidbitKey, args.preferAlternative);
       });
-
-      $scope.focus = function() {
-        $scope.$emit('focused', $scope.frameKey);
-      };
 
       $scope.toggleEdit = function() {
         $scope.switchMode($scope.mode === 'explore' ? 'edit' : 'explore');
@@ -379,22 +429,6 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           arenaController.hideFrame($scope.frameKey);
         };
       }
-      element.children('.frame').draggable({
-        handle: '.title', cancel: '.completion, .CodeMirror', stop: function(event, ui) {
-          $scope.$apply(function() {
-            $scope.layout.x = ui.position.left;
-            $scope.layout.y = ui.position.top;
-          });
-        }
-      }).resizable({
-        handles: 'se', autoHide: true, stop: function(event, ui) {
-          $scope.$apply(function() {
-            $scope.layout.width = ui.size.width;
-            $scope.layout.height = ui.size.height;
-          });
-          self.scrollToBottom();
-        }
-      });
     }
   };
 })
@@ -858,11 +892,13 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         manualScroll = chatHistory.prop('scrollHeight') >
           chatHistory.scrollTop() + chatHistory.innerHeight() + 1;
       }, 500));  // debounced to avoid triggering on animated scroll
-      scrollToBottom = _.partial(_.defer, function() {
+      var scrollToBottom = _.partial(_.defer, _.throttle(function() {
         if (!manualScroll) chatHistory.animate({scrollTop: chatHistory.prop('scrollHeight')}, 400);
-      });
+      }, 500));
       $scope.$watchCollection('messages', scrollToBottom);
       $scope.$watchCollection('tidbitMessages', scrollToBottom);
+      $scope.$watch('presence', scrollToBottom);
+      $(window).on('resize', scrollToBottom);
       // TODO: when details get expanded, scroll chat history such that the top of the text and as
       // much of the rest as possible is within view.  Unconditionally scrolling to bottom could
       // actually take the text out of view, if expanding somewhere earlier in the history.

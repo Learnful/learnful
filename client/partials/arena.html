@@ -1,13 +1,4 @@
-<div class="arena">
-  <div class="viewport" ng-style="{top: transform.offset.top + 'px', left: transform.offset.left + 'px'}">
-    <div class="viewport-handle"></div>
-    <div class="viewport-scale" ng-style="{'-webkit-transform': 'scale(' + transform.scale + ')', 'transform': 'scale(' + transform.scale + ')', top: transform.scaleOffset.top + 'px', left: transform.scaleOffset.left + 'px'}">
-      <div ng-repeat="(frameKey, layout) in layout" ng-click="focus(frameKey)" lf-frame="frameKey"
-           state-user-key="arena.ownerKey || user.currentUserKey" layout="layout"
-           focused="focusedFrameKey === frameKey">
-      </div>
-    </div>
-  </div>
+<div class="arena" ng-class="view">
   <div class="infostrip">
     <img src="http://placehold.it/200x40" alt="Learnful" class="logo"/>
     <div lf-frame-finder="focus(frameKey)" placeholder="What do you want to learn or teach?"></div>
@@ -23,4 +14,17 @@
     </span>
     <div class="current-user" lf-avatar="user.currentUserKey" format="long"></div>
   </div>
+  <div class="viewport" ng-style="viewportStyle">
+    <div ng-repeat="(frameKey, layout) in layout" class="frame-wrapper"
+         ng-class="{focused: focusedFrameKey === frameKey}"
+         ng-style="frameWrapperStyles[frameKey]">
+      <div class="frame-scaler">
+        <div lf-frame="frameKey"
+             state-user-key="arena.ownerKey || user.currentUserKey"
+             focused="focusedFrameKey === frameKey"></div>
+        <div class="frame-cover" ng-click="focus(frameKey)"></div>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-out icon-button fa fa-search-minus" ng-click="focus()"></div>
 </div>
