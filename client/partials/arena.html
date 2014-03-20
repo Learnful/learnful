@@ -1,7 +1,7 @@
 <div class="arena" ng-class="[view, notesToggle ? 'show-notes' : '']">
   <div class="infostrip">
     <span class="logo">Learnful</span>
-    <div lf-frame-finder="focus(frameKey)" placeholder="What do you want to learn or teach?"></div>
+    <div lf-frame-finder focus placeholder="What do you want to learn or teach?"></div>
     <span class="goal">
       <span ng-if="arena.rootFrameKey">
         Goal:
@@ -24,7 +24,7 @@
      ng-class="{on: arena.layout[focusedFrameKey].mode &amp;&amp; arena.layout[focusedFrameKey].mode !== 'explore'}"
      ng-click="toggleEdit()" title="Toggle edit mode"></div>
   </div>
-  <div class="viewport" ng-style="viewportStyle">
+  <div class="viewport" ng-style="viewportStyle" style="opacity: 0">
     <canvas class="frame-connections"></canvas>
     <div ng-repeat="(frameKey, layout) in arena.layout" class="frame-wrapper"
          ng-class="{focused: focusedFrameKey === frameKey, editing: arena.layout[frameKey].mode &amp;&amp; arena.layout[frameKey].mode !== 'explore'}"

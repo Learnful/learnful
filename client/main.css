@@ -115,8 +115,8 @@ input {
 .arena .viewport {
   position: absolute;
   top: 50px; left: 0; bottom: 0; right: 0;
-  transition-property: transform, transform-origin;
-  -webkit-transition-property: -webkit-transform, -webkit-transform-origin;
+  transition-property: transform, transform-origin, opacity;
+  -webkit-transition-property: -webkit-transform, -webkit-transform-origin, opacity;
 }
 
 .arena.show-notes .viewport {

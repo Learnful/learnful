@@ -1,8 +1,8 @@
 <div class="frame" ng-class="[mode, focused ? 'focused' : '']">
-  <div class="title" ng-include="'partials/frame_title_' + mode + '.html'"></div>
+  <div class="title" ng-include="mode ? 'partials/frame_title_' + mode + '.html': null"></div>
   <div class="main-body">
     <div class="content-wrapper">
-      <div class="content" ng-include="'partials/frame_' + mode + '.html'"></div>
+      <div class="content" ng-include="mode ? 'partials/frame_' + mode + '.html' : null"></div>
     </div>
     <div class="sidebar">
       <h5>
@@ -19,5 +19,5 @@
       </div>
     </div>
   </div>
-  <div class="footer" ng-include="'partials/frame_footer_' + mode + '.html'"></div>
+  <div class="footer" ng-include="mode ? 'partials/frame_footer_' + mode + '.html' : null"></div>
 </div>

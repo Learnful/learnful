@@ -50,6 +50,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         arena: {bind: 'arenas/{{arenaKey}}'},
         graph: {pull: 'graph/#', viaKeys: 'arenas/{{arenaKey}}/layout'},
         rootFrameCore: {pull: 'frames/#/core', via: 'arenas/{{arenaKey}}/core/rootFrameKey'},
+        draftChildren: {pull: 'drafts/#/children', viaKeys: 'arenas/{{arenaKey}}/layout'}
       });
 
       handles.arena.ready().then(function() {
@@ -72,21 +73,113 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           $scope.arena.layout[$scope.focusedFrameKey].mode === 'explore' ? 'edit' : 'explore';
       };
 
-      $scope.$on('frameAdded', function(event, frameKey) {
-        event.stopPropagation();
-        if (!$scope.arena.layout[frameKey]) {
-          $scope.arena.layout[frameKey] = {
-            x: -($scope.transform.offset.left + $scope.transform.scaleOffset.left),
-            y: -($scope.transform.offset.top + $scope.transform.scaleOffset.top),
-            width: 650, height: 500
-          };
-        }
-      });
-
       $scope.hideFrame = function(frameKey) {
         $scope.arena.layout[frameKey] = null;
         if ($scope.focusedFrameKey === frameKey) focus();
       };
+
+      $scope.$on('frameAdded', function(event, frameKey, mode, focus) {
+        event.stopPropagation();
+        // Let any data changes caused by the addition propagate, so we compute the right layout
+        // constraints.
+        $timeout(function() {
+          if ($scope.arena.layout[frameKey] || !$scope.bounds) return;
+          var constraints = gatherConstraints(frameKey);
+          var layout = findBestLocation(constraints);
+          layout.mode = mode || 'explore';
+          $scope.arena.layout[frameKey] = layout;
+          if (focus) $scope.focus(frameKey);
+        });
+      });
+
+      function distance(pos1, pos2) {
+        if (_.isObject(pos1) && _.isObject(pos2)) {
+          return Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2);
+        } else {
+          return Math.pow(pos1 - pos2, 2);
+        }
+      }
+
+      function gatherConstraints(newFrameKey) {
+        var constraints = [];
+        constraints.push(function(pos) {
+          return distance(pos, {x: 0, y: 0}) * 0.2;
+        });
+        _.each($scope.arena.layout, function(layout, frameKey) {
+          var edges = $scope.graph[frameKey];
+          var isDescendant = edges && edges.descendantKeys && edges.descendantKeys[newFrameKey];
+          var isAncestor = edges && edges.ancestorKeys && edges.ancestorKeys[newFrameKey];
+          if (isDescendant) {
+            constraints.push(function(pos) {
+              if (pos.y > layout.y) {
+                return -1 / distance(pos.y, layout.y) * 10;
+              } else {
+                return (distance(pos.y, layout.y) + 1) * 10;
+              }
+            });
+          }
+          if (isAncestor) {
+            constraints.push(function(pos) {
+              if (pos.y < layout.y) {
+                return -1 / distance(pos.y, layout.y) * 10;
+              } else {
+                return (distance(pos.y, layout.y) + 1) * 10;
+              }
+            });
+          }
+          if (isDescendant || isAncestor) {
+            constraints.push(function(pos) {
+              return distance(pos.x, layout.x) * 2;
+            });
+          }
+          var isDraftChild = _.some($scope.draftChildren[frameKey], function(child) {
+            return child.frameKey === newFrameKey;
+          });
+          if (isDraftChild && !isDescendant) {
+            constraints.push(function(pos) {
+              if (pos.y > layout.y) {
+                return -1 / distance(pos.y, layout.y) * 5;
+              } else {
+                return (distance(pos.y, layout.y) + 1) * 5;
+              }
+            });
+            if (!isAncestor) {
+              constraints.push(function(pos) {
+                return distance(pos.x, layout.x) * 1;
+              });
+            }
+          }
+        });
+        return constraints;
+      }
+
+      function findBestLocation(constraints) {
+        var occupied = {};
+        _.each($scope.arena.layout, function(layout) {
+          occupied[layout.x + ',' + layout.y] = true;
+        });
+        var wholeMinX = Math.floor($scope.bounds.minX) === $scope.bounds.minX;
+        var wholeMaxX = Math.floor($scope.bounds.maxX) === $scope.bounds.maxX;
+        var minX = [
+          $scope.bounds.minX - (wholeMinX ? 1 : 0.5), $scope.bounds.minX - (wholeMinX ? 0.5 : 1)];
+        var maxX = [
+          $scope.bounds.maxX + (wholeMaxX ? 1 : 0.5), $scope.bounds.maxX + (wholeMaxX ? 0.5 : 1)];
+        var bestPos, bestScore;
+        for (var y = $scope.bounds.minY - 1; y <= $scope.bounds.maxY + 1; y++) {
+          var parity = Math.abs(y % 2);
+          for (var x = minX[parity]; x <= maxX[parity]; x++) {
+            if (occupied[x + ',' + y]) continue;
+            var pos = {x: x, y: y};
+            var score = _.reduce(constraints, function(sum, fn) {return sum + fn(pos);}, 0);
+            if (_.isUndefined(bestScore) || score < bestScore) {
+              bestPos = pos;
+              bestScore = score;
+            }
+          }
+        }
+        return bestPos;
+      }
+
     },
 
     link: function($scope, element, attrs, controller) {
@@ -96,9 +189,18 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       var MARGIN_X = 50, MARGIN_Y = 50;
       var CURVE_MARGIN_X = (STEP_X - SIZE_X) / 1.2, CURVE_MARGIN_Y = (STEP_Y - SIZE_Y) / 1.2;
       var viewport = element.find('.viewport');
-      var bounds;
       var canvas = element.find('.frame-connections').get(0);
       var ctx = canvas.getContext('2d');
+
+      // function initViewportStyle() {
+      //     var transform = $interpolate('translate({{tx}}px,{{ty}}px) scale({{scale}})')({
+      //       scale: 0.01,
+      //       tx: viewport.innerWidth() / 2,
+      //       ty: viewport.innerHeight() / 2
+      //     });
+      //   $scope.viewportStyle = {transform: transform, '-webkit-transform': transform};
+      // }
+      // initViewportStyle();
 
       function computeLayoutBounds()  {
         var b = {minX: 0, maxX: 0, minY: 0, maxY: 0};
@@ -119,16 +221,16 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       function computeViewportStyle() {
         var wx = viewport.innerWidth(), wy = viewport.innerHeight();
         if ($scope.view === 'overview') {
-          var scaleX = Math.min(0.75, wx / (bounds.spanX * STEP_X + SIZE_X + MARGIN_X * 2));
-          var scaleY = Math.min(0.75, wy / (bounds.spanY * STEP_Y + SIZE_Y + MARGIN_Y * 2));
+          var scaleX = Math.min(0.75, wx / ($scope.bounds.spanX * STEP_X + SIZE_X + MARGIN_X * 2));
+          var scaleY = Math.min(0.75, wy / ($scope.bounds.spanY * STEP_Y + SIZE_Y + MARGIN_Y * 2));
           var transformOrigin = $interpolate('{{cx}}px {{cy}}px')({
-            cx: bounds.centerX * STEP_X,
-            cy: bounds.centerY * STEP_Y
+            cx: $scope.bounds.centerX * STEP_X,
+            cy: $scope.bounds.centerY * STEP_Y
           });
           var transform = $interpolate('translate({{tx}}px,{{ty}}px) scale({{scale}})')({
             scale: Math.min(scaleX, scaleY),
-            tx: -bounds.centerX * STEP_X + wx / 2,
-            ty: -bounds.centerY * STEP_Y + wy / 2
+            tx: -$scope.bounds.centerX * STEP_X + wx / 2,
+            ty: -$scope.bounds.centerY * STEP_Y + wy / 2
           });
           return {
             'transform-origin': transformOrigin, '-webkit-transform-origin': transformOrigin,
@@ -148,6 +250,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       }
 
       function computeFrameWrapperStyle(frameKey, layout) {
+        if (!layout) return;
         var wx = viewport.innerWidth(), wy = viewport.innerHeight();
         var cx = layout.x * STEP_X, cy = layout.y * STEP_Y;
         if (frameKey === $scope.focusedFrameKey) {
@@ -184,30 +287,50 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       function drawConnections() {
         if (!$scope.arena) return;
-        var offsetX = bounds.minX * STEP_X - HALF_X - MARGIN_X;
-        var offsetY = bounds.minY * STEP_Y - HALF_Y - MARGIN_Y;
-        canvas.width = bounds.spanX * STEP_X + SIZE_X + 2 * MARGIN_X;
-        canvas.height = bounds.spanY * STEP_Y + SIZE_Y + 2 * MARGIN_Y;
+        var offsetX = $scope.bounds.minX * STEP_X - HALF_X - MARGIN_X;
+        var offsetY = $scope.bounds.minY * STEP_Y - HALF_Y - MARGIN_Y;
+        canvas.width = $scope.bounds.spanX * STEP_X + SIZE_X + 2 * MARGIN_X;
+        canvas.height = $scope.bounds.spanY * STEP_Y + SIZE_Y + 2 * MARGIN_Y;
         canvas.style.left = offsetX + 'px';
         canvas.style.top = offsetY + 'px';
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.translate(-offsetX, -offsetY);
         ctx.lineWidth = 50;
         ctx.strokeStyle = 'rgba(0,180,0,0.05)';
-        _.each($scope.graph, function(node, frameKey) {
-          if (!node) return;
-          var frameLayout = $scope.arena.layout[frameKey];
+        _.each($scope.arena.layout, function(frameLayout, frameKey) {
           if (!frameLayout) return;
-          _.each(node.childKeys, function(unused, childKey) {
+          var node = $scope.graph[frameKey];
+          var childKeys = _.keys(node && node.childKeys), draftChildKeys = childKeys;
+          if (frameLayout.mode !== 'explore') {
+            draftChildKeys = _.chain($scope.draftChildren[frameKey])
+              .reject(function(child) {return child.archived;})
+              .pluck('frameKey')
+              .value();
+            childKeys = _.union(childKeys, draftChildKeys);
+          }
+          _.each(childKeys, function(childKey) {
             var childLayout = $scope.arena.layout[childKey];
             if (!childLayout) return;
+            var lineWidth = ctx.lineWidth;
+            var strokeStyle = ctx.strokeStyle;
+            if (!_.contains(draftChildKeys, childKey)) {
+              lineWidth = 25;
+              strokeStyle = 'rgba(180,0,0,0.05)';
+            } else if (!(node && node.childKeys && node.childKeys[childKey])) {
+              lineWidth = 25;
+              strokeStyle = 'rgba(0,0,180,0.05)';
+            }
+            ctx.save();
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = strokeStyle;
             drawLink(frameLayout, childLayout);
+            ctx.restore();
           });
-          _.each(node.descendantKeys, function(unused, descendantKey) {
+          _.each(node && node.descendantKeys, function(unused, descendantKey) {
             var descendantLayout = $scope.arena.layout[descendantKey];
             if (!descendantLayout || descendantKey === frameKey ||
-                node.childKeys && node.childKeys[descendantKey] ||
-                _.some(node.childKeys, function(unused, childKey) {
+                node && node.childKeys && node.childKeys[descendantKey] ||
+                _.some(node && node.childKeys, function(unused, childKey) {
                   return $scope.graph[childKey] && $scope.graph[childKey].descendantKeys &&
                     $scope.graph[childKey].descendantKeys[descendantKey];
                 }
@@ -223,7 +346,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       }
 
       function updateView() {
-        if (!$scope.arena || !bounds) return;
+        if (!$scope.arena || !$scope.bounds) return;
         $scope.viewportStyle = computeViewportStyle();
         $scope.frameWrapperStyles = {};
         _.each($scope.arena.layout, function(layout, frameKey) {
@@ -231,16 +354,22 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         });
       }
 
+      var firstLayout = true;
+
       function updateLayout() {
         if (!$scope.arena) return;
-        bounds = computeLayoutBounds();
+        $scope.bounds = computeLayoutBounds();
         updateView();
         drawConnections();
+        if (firstLayout) {
+          firstLayout = false;
+          $timeout(function() {viewport.css('opacity', 1);}, 500, false);
+        }
       }
 
       $scope.$watch('arena.layout', updateLayout, true);
       $scope.$watch('[view, focusedFrameKey, notesToggle]', updateView, true);
-      $scope.$watch('graph', drawConnections, true);
+      $scope.$watch('[graph, draftChildren]', drawConnections, true);
       $(window).on('resize', _.throttle(function() {$timeout(updateView);}, 400));
     }
   };
@@ -1108,8 +1237,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         if (frameKey === '#create') {
           frameKey = createFrame(item.label.slice(createFrameLabelPrefix.length));
         }
-        $scope.$emit('frameAdded', frameKey);
-        $scope.selectCallback({frameKey: frameKey});
+        if ($scope.selectCallback) $scope.selectCallback({frameKey: frameKey});
+        $scope.$emit('frameAdded', frameKey, attrs.mode, 'focus' in attrs);
       });
 
     }
