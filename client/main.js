@@ -392,6 +392,16 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         votes: {pull: 'votes/frames/{{frameKey}}'}
       });
 
+      function moveContentToCore(frame) {
+        if (frame.content && !frame.core.content) {
+          frame.core.content = frame.content;
+          frame.content = null;
+        }
+      }
+
+      handles.frame.ready().then(function() {moveContentToCore($scope.frame);});
+      handles.draft.ready().then(function() {moveContentToCore($scope.draft);});
+
       $scope.trigger = function(tidbitKey, preferAlternative) {
         var preferredAuthorKey = $scope.mode === 'explore' ? null : user.currentUserKey;
         guidance.trigger(
@@ -824,7 +834,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
     scope: true,
     link: function($scope, element, attrs, controller) {
       var contentScope;
-      $scope.$watch(attrs.lfFrameContent + '.content', function(newValue) {
+      $scope.$watch(attrs.lfFrameContent + '.core.content', function(newValue) {
         element.html(newValue);
         if (contentScope) contentScope.$destroy();
         contentScope = $scope.stateScope.$new();
@@ -1211,7 +1221,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       function createFrame(title) {
         title = title || 'New frame';
-        var stub = {core: {title: title}, content: 'To be filled in...'};
+        var stub = {core: {title: title, content: 'To be filled in...'}};
         var frameKey = handles.frames.ref().push(stub).name();
         handles.drafts.ref(frameKey).set(stub);
         return frameKey;
