@@ -1,4 +1,5 @@
 <span class="avatar-wrapper">
-  <img class="avatar" ng-src="{{persona.avatar}}" title="{{persona.name}}" height="40" width="40"/>
+  <canvas class="avatar" height="40" width="40" title="{{persona.name}}"></canvas>
+  <img class="avatar-source" ng-src="{{persona.avatar}}"/>
   <span ng-show="format === 'long'">{{persona.name}}</span>
 </span>

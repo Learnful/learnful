@@ -1152,6 +1152,20 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       fire.connect($scope, {
         persona: {pull: 'users/{{userKey}}/persona'}
       });
+    },
+    link: function($scope, element, attrs, controller) {
+      var ctx = element.find('canvas').get(0).getContext('2d');
+      var sourceImage = element.find('.avatar-source');
+      sourceImage.on('load', function() {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(20, 20, 20, 0, 2 * Math.PI, false);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.clip();
+        ctx.drawImage(sourceImage.get(0), 0, 0, 40, 40);
+        ctx.restore();
+      });
     }
   };
 })

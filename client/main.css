@@ -492,6 +492,10 @@ input {
   vertical-align: middle;
 }
 
+.avatar-source {
+  display: none;
+}
+
 .tidbit-table {
   margin-bottom: 5px;
   width: 100%;
