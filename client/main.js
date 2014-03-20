@@ -40,7 +40,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
   return {
     templateUrl: 'partials/arena.html',
     scope: {arenaKey: '@lfArena'},
-    controller: function($scope, fire, user, search) {
+    controller: function($scope, $q, fire, user, search) {
       $scope.user = user;
       $scope.focusedFrameKey = null;
       $scope.notesToggle = false;
@@ -48,17 +48,18 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       var handles = fire.connect($scope, {
         arena: {bind: 'arenas/{{arenaKey}}'},
+        arenaStates: {bind: 'users/{{user.currentUserKey}}/arenaStates/{{arenaKey}}'},
         graph: {pull: 'graph/#', viaKeys: 'arenas/{{arenaKey}}/layout'},
         rootFrameCore: {pull: 'frames/#/core', via: 'arenas/{{arenaKey}}/core/rootFrameKey'},
         draftChildren: {pull: 'drafts/#/children', viaKeys: 'arenas/{{arenaKey}}/layout'}
       });
 
-      handles.arena.ready().then(function() {
-        if (!$scope.arena.layout) {
-          $scope.arena.layout = {};
-        }
-        _.each($scope.arena.layout, function(layout) {
-          if (!layout.mode) layout.mode = 'explore';
+      $q.all(handles.arena.ready(), handles.arenaStates.ready()).then(function() {
+        if (!$scope.arena.layout) $scope.arena.layout = {};
+        if (!$scope.arenaStates) $scope.arenaStates = {};
+        _.each($scope.arena.layout, function(layout, frameKey) {
+          if (!$scope.arenaStates[frameKey]) $scope.arenaStates[frameKey] = {};
+          if (!$scope.arenaStates[frameKey].mode) $scope.arenaStates[frameKey].mode = 'explore';
         });
       });
 
@@ -69,12 +70,13 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       };
 
       $scope.toggleEdit = function() {
-        $scope.arena.layout[$scope.focusedFrameKey].mode =
-          $scope.arena.layout[$scope.focusedFrameKey].mode === 'explore' ? 'edit' : 'explore';
+        $scope.arenaStates[$scope.focusedFrameKey].mode =
+          $scope.arenaStates[$scope.focusedFrameKey].mode === 'explore' ? 'edit' : 'explore';
       };
 
       $scope.hideFrame = function(frameKey) {
         $scope.arena.layout[frameKey] = null;
+        $scope.arenaStates[frameKey] = null;
         if ($scope.focusedFrameKey === frameKey) focus();
       };
 
@@ -85,9 +87,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         $timeout(function() {
           if ($scope.arena.layout[frameKey] || !$scope.bounds) return;
           var constraints = gatherConstraints(frameKey);
-          var layout = findBestLocation(constraints);
-          layout.mode = mode || 'explore';
-          $scope.arena.layout[frameKey] = layout;
+          $scope.arena.layout[frameKey] = findBestLocation(constraints);
+          $scope.arenaStates[frameKey].mode = mode || 'explore';
           if (focus) $scope.focus(frameKey);
         });
       });
@@ -286,7 +287,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       }
 
       function drawConnections() {
-        if (!$scope.arena) return;
+        if (!($scope.arena && $scope.arenaStates)) return;
         var offsetX = $scope.bounds.minX * STEP_X - HALF_X - MARGIN_X;
         var offsetY = $scope.bounds.minY * STEP_Y - HALF_Y - MARGIN_Y;
         canvas.width = $scope.bounds.spanX * STEP_X + SIZE_X + 2 * MARGIN_X;
@@ -301,7 +302,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           if (!frameLayout) return;
           var node = $scope.graph[frameKey];
           var childKeys = _.keys(node && node.childKeys), draftChildKeys = childKeys;
-          if (frameLayout.mode !== 'explore') {
+          if ($scope.arenaStates[frameKey] && $scope.arenaStates[frameKey].mode !== 'explore') {
             draftChildKeys = _.chain($scope.draftChildren[frameKey])
               .reject(function(child) {return child.archived;})
               .pluck('frameKey')
@@ -369,7 +370,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       $scope.$watch('arena.layout', updateLayout, true);
       $scope.$watch('[view, focusedFrameKey, notesToggle]', updateView, true);
-      $scope.$watch('[graph, draftChildren]', drawConnections, true);
+      $scope.$watch('[graph, draftChildren, arenaStates]', drawConnections, true);
       $(window).on('resize', _.throttle(function() {$timeout(updateView);}, 400));
     }
   };
