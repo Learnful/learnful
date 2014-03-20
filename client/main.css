@@ -98,6 +98,10 @@ input {
   overflow-y: hidden;
 }
 
+.CodeMirror-empty {
+  color: #aaa;
+}
+
 .proportional-font .CodeMirror {
   font-family: sans-serif;
 }
@@ -137,7 +141,11 @@ input {
   border: 2px solid #eee;
 }
 
-.detail .frame-scaler {
+.arena .editing .frame-scaler {
+  border-color: lightpink;
+}
+
+.arena.detail .frame-scaler {
   background-color: white;
   border-color: transparent;
 }
@@ -149,11 +157,12 @@ input {
 
 .arena .frame-scaler .frame-hide-button {
   position: absolute;
-  top: -5px;
-  right: -15px;
+  top: -15px;
+  right: -20px;
   display: none;
-  font-size: 200%;
+  font-size: 250%;
   z-index: 101;
+  background-color: rgba(255,255,255,.65);
 }
 
 .overview .frame-scaler:hover .frame-hide-button {
@@ -200,6 +209,7 @@ input {
   position: fixed;
   bottom: 0;
   left: 0;
+  border-top-right-radius: 15px;
 }
 
 .overview .zoom-out {
@@ -211,6 +221,7 @@ input {
   bottom: 0;
   left: -50px;
   z-index: 1;
+  border-top-left-radius: 15px;
 }
 
 .overview .edit-frame {
@@ -309,8 +320,8 @@ input {
   right: -25%;
   width: 25%;
   transition-property: right;
-  border-top: 3px solid #E3EBF2;
-  border-left: 3px solid #E3EBF2;
+  border-top: 3px solid #E6EEE6;
+  border-left: 3px solid #E6EEE6;
 }
 
 .arena.show-notes .notes {

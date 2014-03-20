@@ -785,13 +785,14 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
     require: '?ngModel',
     scope: {model: '=ngModel'},
     link: function($scope, element, attrs, ngModel) {
-      if (!$scope.model) {
+      if (!$scope.model && element.text().trim()) {
         $scope.model = element.text().trim();
         if ($scope.model.indexOf('\n') !== -1) $scope.model += '\n';
       }
       element.html('');
 
       var options = {mode: attrs.mode};
+      if (attrs.placeholder) options.placeholder = attrs.placeholder;
       if (attrs.mode === 'javascript-expression')  {
         _.extend(options, {
           mode: 'javascript',
@@ -867,8 +868,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       var presenceReg, destroyed = false;
       function updatePresence() {
-        if ($scope.connected) {
-          if ($scope.presence && user.currentUserKey && (
+        if ($scope.connected || destroyed) {  // bound vars may disappear first when scope destroyed
+          if ($scope.presence && user.currentUserKey && !destroyed && (
               !presenceReg || !$scope.participantKeys ||
               $scope.participantKeys[presenceReg.name()] !== user.currentUserKey)) {
             if (!presenceReg) {

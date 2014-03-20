@@ -19,7 +19,7 @@
   </div>
   <div class="notes">
     <div class="notes-text proportional-font" lf-code-editor ng-model="arena.notes"
-         placeholder="Enter your personal notes here."></div>
+         placeholder="You can enter your personal notes here."></div>
     <div class="viewport-button edit-frame icon-button fa fa-pencil"
      ng-class="{on: arena.layout[focusedFrameKey].mode &amp;&amp; arena.layout[focusedFrameKey].mode !== 'explore'}"
      ng-click="toggleEdit()" title="Toggle edit mode"></div>
@@ -27,7 +27,7 @@
   <div class="viewport" ng-style="viewportStyle">
     <canvas class="frame-connections"></canvas>
     <div ng-repeat="(frameKey, layout) in arena.layout" class="frame-wrapper"
-         ng-class="{focused: focusedFrameKey === frameKey}"
+         ng-class="{focused: focusedFrameKey === frameKey, editing: arena.layout[frameKey].mode &amp;&amp; arena.layout[frameKey].mode !== 'explore'}"
          ng-style="frameWrapperStyles[frameKey]">
       <div class="frame-scaler">
         <div lf-frame="frameKey"
@@ -35,10 +35,12 @@
              state-user-key="arena.ownerKey || user.currentUserKey"
              focused="focusedFrameKey === frameKey"></div>
         <div class="frame-cover" ng-click="focus(frameKey)"></div>
-        <div class="frame-hide-button icon-button fa fa-times-circle" ng-click="hideFrame(frameKey)"></div>
+        <div class="frame-hide-button icon-button fa fa-times-circle" ng-click="hideFrame(frameKey)"
+             title="Remove this frame from the workspace (does not delete it)."></div>
       </div>
     </div>
   </div>
-  <div class="viewport-button zoom-out icon-button fa fa-search-minus" ng-click="focus()"></div>
+  <div class="viewport-button zoom-out icon-button fa fa-search-minus" ng-click="focus()"
+       title="Zoom back out to the workspace."></div>
   </div>
 </div>
