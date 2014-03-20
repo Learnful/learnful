@@ -43,19 +43,22 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
     controller: function($scope, fire, user, search) {
       $scope.user = user;
       $scope.focusedFrameKey = null;
+      $scope.notesToggle = false;
       $scope.view = 'overview';  // choices: overview, detail
 
       var handles = fire.connect($scope, {
-        arena: {bind: 'arenas/{{arenaKey}}/core'},
-        layout: {bind: 'arenas/{{arenaKey}}/layout'},
+        arena: {bind: 'arenas/{{arenaKey}}'},
         graph: {pull: 'graph/#', viaKeys: 'arenas/{{arenaKey}}/layout'},
         rootFrameCore: {pull: 'frames/#/core', via: 'arenas/{{arenaKey}}/core/rootFrameKey'},
       });
 
-      handles.layout.ready().then(function() {
-        if (!$scope.layout) {
-          $scope.layout = {};
+      handles.arena.ready().then(function() {
+        if (!$scope.arena.layout) {
+          $scope.arena.layout = {};
         }
+        _.each($scope.arena.layout, function(layout) {
+          if (!layout.mode) layout.mode = 'explore';
+        });
       });
 
       $scope.$on('focused', function(event, frameKey) {$scope.focus(frameKey);});
@@ -64,10 +67,15 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         $scope.view = frameKey ? 'detail' : 'overview';
       };
 
+      $scope.toggleEdit = function() {
+        $scope.arena.layout[$scope.focusedFrameKey].mode =
+          $scope.arena.layout[$scope.focusedFrameKey].mode === 'explore' ? 'edit' : 'explore';
+      };
+
       $scope.$on('frameAdded', function(event, frameKey) {
         event.stopPropagation();
-        if (!$scope.layout[frameKey]) {
-          $scope.layout[frameKey] = {
+        if (!$scope.arena.layout[frameKey]) {
+          $scope.arena.layout[frameKey] = {
             x: -($scope.transform.offset.left + $scope.transform.scaleOffset.left),
             y: -($scope.transform.offset.top + $scope.transform.scaleOffset.top),
             width: 650, height: 500
@@ -75,8 +83,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         }
       });
 
-      this.hideFrame = $scope.hideFrame = function(frameKey) {
-        $scope.layout[frameKey] = null;
+      $scope.hideFrame = function(frameKey) {
+        $scope.arena.layout[frameKey] = null;
         if ($scope.focusedFrameKey === frameKey) focus();
       };
     },
@@ -85,7 +93,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       var SIZE_X = 600, STEP_X = SIZE_X * 1.33, HALF_X = SIZE_X / 2;
       var SIZE_Y = 400, STEP_Y = SIZE_Y * 1.33, HALF_Y = SIZE_Y / 2;
-      var MARGIN_X = 30, MARGIN_Y = 50;
+      var MARGIN_X = 50, MARGIN_Y = 50;
       var CURVE_MARGIN_X = (STEP_X - SIZE_X) / 1.2, CURVE_MARGIN_Y = (STEP_Y - SIZE_Y) / 1.2;
       var viewport = element.find('.viewport');
       var bounds;
@@ -94,7 +102,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       function computeLayoutBounds()  {
         var b = {minX: 0, maxX: 0, minY: 0, maxY: 0};
-        _.each($scope.layout, function(a) {
+        _.each($scope.arena.layout, function(a) {
+          if (!a) return;
           b = {
             minX: Math.min(b.minX, a.x), maxX: Math.max(b.maxX, a.x),
             minY: Math.min(b.minY, a.y), maxY: Math.max(b.maxY, a.y)
@@ -126,7 +135,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
             transform: transform, '-webkit-transform': transform,
           };
         } else if ($scope.view === 'detail') {
-          var frameLayout = $scope.layout[$scope.focusedFrameKey];
+          var frameLayout = $scope.arena.layout[$scope.focusedFrameKey];
           var transform = $interpolate('translate({{tx}}px,{{ty}}px) scale(1)')({
             tx: -frameLayout.x * STEP_X + wx / 2,
             ty: -frameLayout.y * STEP_Y + wy / 2
@@ -167,13 +176,14 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         ctx.moveTo(sourceFrameLayout.x * STEP_X, sourceFrameLayout.y * STEP_Y + HALF_Y);
         ctx.bezierCurveTo(
           sourceFrameLayout.x * STEP_X, sourceFrameLayout.y * STEP_Y + HALF_Y + CURVE_MARGIN_Y,
-          destFrameLayout.x * STEP_X, destFrameLayout.y * STEP_Y - HALF_Y - CURVE_MARGIN_Y - 10,
-          destFrameLayout.x * STEP_X, destFrameLayout.y * STEP_Y - HALF_Y - 10
+          destFrameLayout.x * STEP_X, destFrameLayout.y * STEP_Y - HALF_Y - CURVE_MARGIN_Y,
+          destFrameLayout.x * STEP_X, destFrameLayout.y * STEP_Y - HALF_Y
         );
         ctx.stroke();
       }
 
       function drawConnections() {
+        if (!$scope.arena) return;
         var offsetX = bounds.minX * STEP_X - HALF_X - MARGIN_X;
         var offsetY = bounds.minY * STEP_Y - HALF_Y - MARGIN_Y;
         canvas.width = bounds.spanX * STEP_X + SIZE_X + 2 * MARGIN_X;
@@ -186,15 +196,15 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         ctx.strokeStyle = 'rgba(0,180,0,0.05)';
         _.each($scope.graph, function(node, frameKey) {
           if (!node) return;
-          var frameLayout = $scope.layout[frameKey];
+          var frameLayout = $scope.arena.layout[frameKey];
           if (!frameLayout) return;
           _.each(node.childKeys, function(unused, childKey) {
-            var childLayout = $scope.layout[childKey];
+            var childLayout = $scope.arena.layout[childKey];
             if (!childLayout) return;
             drawLink(frameLayout, childLayout);
           });
           _.each(node.descendantKeys, function(unused, descendantKey) {
-            var descendantLayout = $scope.layout[descendantKey];
+            var descendantLayout = $scope.arena.layout[descendantKey];
             if (!descendantLayout || descendantKey === frameKey ||
                 node.childKeys && node.childKeys[descendantKey] ||
                 _.some(node.childKeys, function(unused, childKey) {
@@ -213,21 +223,23 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       }
 
       function updateView() {
+        if (!$scope.arena || !bounds) return;
         $scope.viewportStyle = computeViewportStyle();
         $scope.frameWrapperStyles = {};
-        _.each($scope.layout, function(layout, frameKey) {
+        _.each($scope.arena.layout, function(layout, frameKey) {
           $scope.frameWrapperStyles[frameKey] = computeFrameWrapperStyle(frameKey, layout);
         });
       }
 
       function updateLayout() {
+        if (!$scope.arena) return;
         bounds = computeLayoutBounds();
         updateView();
         drawConnections();
       }
 
-      $scope.$watch('layout', updateLayout, true);
-      $scope.$watch('[view, focusedFrameKey]', updateView, true);
+      $scope.$watch('arena.layout', updateLayout, true);
+      $scope.$watch('[view, focusedFrameKey, notesToggle]', updateView, true);
       $scope.$watch('graph', drawConnections, true);
       $(window).on('resize', _.throttle(function() {$timeout(updateView);}, 400));
     }
@@ -237,11 +249,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 .directive('lfFrame', function()  {
   return {
     templateUrl: 'partials/frame.html',
-    scope: {frameKey: '=lfFrame', stateUserKey: '=', focused: '='},
-    require: '^?lfArena',
+    scope: {frameKey: '=lfFrame', stateUserKey: '=', focused: '=', mode: '='},
     controller: function($scope, $timeout, fire, modal, user, guidance, director) {
-      $scope.mode = 'explore';  // one of: explore, edit, preview
       $scope.user = user;
+      $scope.stateScope = null;
       $scope.expandedTidbits = {};
       $scope.expandedChildren = {};
       $scope.showArchived = {};
@@ -288,36 +299,38 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       }
 
       var frameStateScope = createStateScope('frames');
-      $scope.stateScope = frameStateScope;
 
       $scope.$on('trigger', function(event, args) {
         $scope.trigger(args.tidbitKey, args.preferAlternative);
       });
 
-      $scope.toggleEdit = function() {
-        $scope.switchMode($scope.mode === 'explore' ? 'edit' : 'explore');
+      $scope.switchMode = function(mode) {
+        $scope.mode = mode;
       };
 
-      $scope.switchMode = function(mode) {
+      $scope.$watch('mode', function(mode) {
         switch(mode) {
           case 'explore':
-            $scope.stateScope.$destroy();
+            if ($scope.stateScope && $scope.stateScope !== frameStateScope) {
+              $scope.stateScope.$destroy();
+            }
             $scope.stateScope = frameStateScope;
             break;
           case 'edit':
-            $scope.stateScope = createStateScope('drafts');
+            if (!$scope.stateScope || $scope.stateScope === frameStateScope) {
+              $scope.stateScope = createStateScope('drafts');
+            }
             if (!$scope.draft) $scope.draft = angular.copy($scope.frame);
             break;
           case 'preview':
             syncDraftTidbitKeys();
-            $scope.stateScope.$destroy();
+            if ($scope.stateScope && $scope.stateScope !== frameStateScope) {
+              $scope.stateScope.$destroy();
+            }
             $scope.stateScope = createStateScope('drafts');
             break;
-          default:
-            throw new Error('Unknown frame mode: ' + mode);
         }
-        $scope.mode = mode;
-      };
+      });
 
       function detectDuplicateTidbits() {
         tidbitIds = {};
@@ -490,14 +503,6 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         return $scope.frame.children && childKey in $scope.frame.children;
       };
     },
-
-    link: function($scope, element, attrs, arenaController) {
-      if (arenaController) {
-        $scope.hideFrame = function() {
-          arenaController.hideFrame($scope.frameKey);
-        };
-      }
-    }
   };
 })
 
@@ -797,7 +802,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           matchBrackets: true,
           lint: true,
           lineNumbers: true,
-          gutters: ['CodeMirror-lint-markers']
+          gutters: ['CodeMirror-lint-markers'],
+          fixedGutter: false  // TODO: arena overview scaling (?) breaks fixed gutters
         });
       } else if (attrs.mode === 'htmlmixed') {
         _.extend(options, {
