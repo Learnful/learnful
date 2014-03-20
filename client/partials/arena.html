@@ -24,6 +24,7 @@
      ng-class="{on: arenaStates[focusedFrameKey].mode &amp;&amp; arenaStates[focusedFrameKey].mode !== 'explore'}"
      ng-click="toggleEdit()" title="Toggle edit mode"></div>
   </div>
+  <div class="loading">Loading...</div>
   <div class="viewport" ng-style="viewportStyle" style="opacity: 0">
     <canvas class="frame-connections"></canvas>
     <div ng-repeat="(frameKey, layout) in arena.layout" class="frame-wrapper"

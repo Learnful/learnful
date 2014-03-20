@@ -190,18 +190,9 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       var MARGIN_X = 50, MARGIN_Y = 50;
       var CURVE_MARGIN_X = (STEP_X - SIZE_X) / 1.2, CURVE_MARGIN_Y = (STEP_Y - SIZE_Y) / 1.2;
       var viewport = element.find('.viewport');
+      var loading = element.find('.loading');
       var canvas = element.find('.frame-connections').get(0);
       var ctx = canvas.getContext('2d');
-
-      // function initViewportStyle() {
-      //     var transform = $interpolate('translate({{tx}}px,{{ty}}px) scale({{scale}})')({
-      //       scale: 0.01,
-      //       tx: viewport.innerWidth() / 2,
-      //       ty: viewport.innerHeight() / 2
-      //     });
-      //   $scope.viewportStyle = {transform: transform, '-webkit-transform': transform};
-      // }
-      // initViewportStyle();
 
       function computeLayoutBounds()  {
         var b = {minX: 0, maxX: 0, minY: 0, maxY: 0};
@@ -364,7 +355,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         drawConnections();
         if (firstLayout) {
           firstLayout = false;
-          $timeout(function() {viewport.css('opacity', 1);}, 500, false);
+          $timeout(function() {
+            loading.css('opacity', 0);
+            viewport.css('opacity', 1);
+          }, 500, false);
         }
       }
 

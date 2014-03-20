@@ -112,6 +112,15 @@ input {
   overflow: hidden;
 }
 
+.arena .loading {
+  position: absolute;
+  top: 45%;
+  left: 0; right: 0;
+  font-size: 300%; font-weight: bold; color: #ddd;
+  text-align: center;
+  transition-property: opacity;
+}
+
 .arena .viewport {
   position: absolute;
   top: 50px; left: 0; bottom: 0; right: 0;
@@ -169,7 +178,7 @@ input {
   display: block;
 }
 
-.arena .viewport, .arena .frame-wrapper, .arena .zoom-out, .arena .edit-frame,
+.arena .viewport, .arena .frame-wrapper, .arena .zoom-out, .arena .edit-frame, .arena .loading,
 .arena .frame-connections, .arena .notes,
 .frame .sidebar, .frame .sidebar-content, .frame .sequencer, .frame .title, .frame .footer,
 .chatroom .chat-presence, .chatroom .chat-history, .chatroom .chat-input, .chatroom .chat-input > * {
