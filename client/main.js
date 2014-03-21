@@ -42,9 +42,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
     scope: {arenaKey: '@lfArena'},
     controller: function($scope, $q, fire, user, search) {
       $scope.user = user;
-      $scope.focusedFrameKey = null;
       $scope.notesToggle = false;
-      $scope.view = 'overview';  // choices: overview, detail
+      $scope.view = null;  // choices: overview, detail
 
       var handles = fire.connect($scope, {
         arena: {bind: 'arenas/{{arenaKey}}'},
@@ -56,28 +55,52 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       $q.all(handles.arena.ready(), handles.arenaStates.ready()).then(function() {
         if (!$scope.arena.layout) $scope.arena.layout = {};
-        if (!$scope.arenaStates) $scope.arenaStates = {};
+        if (!$scope.arenaStates) $scope.arenaStates = {frames: {}};
+        $scope.view = $scope.arenaStates.focusedFrameKey ? 'detail' : 'overview';
         _.each($scope.arena.layout, function(layout, frameKey) {
-          if (!$scope.arenaStates[frameKey]) $scope.arenaStates[frameKey] = {};
-          if (!$scope.arenaStates[frameKey].mode) $scope.arenaStates[frameKey].mode = 'explore';
+          if (!$scope.arenaStates.frames[frameKey]) $scope.arenaStates.frames[frameKey] = {};
+          if (!$scope.arenaStates.frames[frameKey].mode) {
+            $scope.arenaStates.frames[frameKey].mode = 'explore';
+          }
         });
       });
 
       $scope.$on('focused', function(event, frameKey) {$scope.focus(frameKey);});
       $scope.focus = function(frameKey) {
-        $scope.focusedFrameKey = frameKey;
-        $scope.view = frameKey ? 'detail' : 'overview';
+        if (frameKey && $scope.arenaStates.focusedFrameKey && $scope.arena.layout[frameKey]) {
+          // Up-and-over animation to transition between two focused frames
+          var fromLayout = $scope.arena.layout[$scope.arenaStates.focusedFrameKey];
+          var toLayout = $scope.arena.layout[frameKey];
+          $scope.transition = {
+            stage: 'begin', from: $scope.arenaStates.focusedFrameKey, to: frameKey,
+            pos: {x: (fromLayout.x + toLayout.x) / 2, y: (fromLayout.y + toLayout.y) / 2}
+          };
+          $scope.arenaStates.focusedFrameKey = null;
+          $scope.view = 'overview';
+          $timeout(function() {
+            $scope.arenaStates.focusedFrameKey = frameKey;
+            $scope.view = 'detail';
+            $scope.transition.stage = 'end';
+            $timeout(function() {
+              $scope.transition = null;
+            }, 500);
+          }, 500);
+        } else {
+          $scope.arenaStates.focusedFrameKey = frameKey || null;
+          $scope.view = frameKey ? 'detail' : 'overview';
+        }
       };
 
       $scope.toggleEdit = function() {
-        $scope.arenaStates[$scope.focusedFrameKey].mode =
-          $scope.arenaStates[$scope.focusedFrameKey].mode === 'explore' ? 'edit' : 'explore';
+        $scope.arenaStates.frames[$scope.arenaStates.focusedFrameKey].mode =
+          $scope.arenaStates.frames[$scope.arenaStates.focusedFrameKey].mode === 'explore' ?
+            'edit' : 'explore';
       };
 
       $scope.hideFrame = function(frameKey) {
         $scope.arena.layout[frameKey] = null;
-        $scope.arenaStates[frameKey] = null;
-        if ($scope.focusedFrameKey === frameKey) focus();
+        $scope.arenaStates.frames[frameKey] = null;
+        if ($scope.arenaStates.focusedFrameKey === frameKey) focus();
       };
 
       $scope.$on('frameAdded', function(event, frameKey, mode, focus) {
@@ -85,12 +108,23 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         // Let any data changes caused by the addition propagate, so we compute the right layout
         // constraints.
         $timeout(function() {
-          if ($scope.arena.layout[frameKey] || !$scope.bounds) return;
-          var constraints = gatherConstraints(frameKey);
-          $scope.arena.layout[frameKey] = findBestLocation(constraints);
-          $scope.arenaStates[frameKey].mode = mode || 'explore';
+          if (!$scope.arena.layout[frameKey] && $scope.bounds) {
+            var constraints = gatherConstraints(frameKey);
+            $scope.arena.layout[frameKey] = findBestLocation(constraints);
+            $scope.arenaStates.frames[frameKey] = {};
+            mode = mode || 'explore';
+          }
+          if (mode) $scope.arenaStates.frames[frameKey].mode = mode;
           if (focus) $scope.focus(frameKey);
         });
+      });
+
+      $scope.$on('transition', function(event, data) {
+        if (!data.reflected) {
+          data.reflected = true;
+          // Bounce the transition back down, so it can find its target frame.
+          $scope.$broadcast('transition', data);
+        }
       });
 
       function distance(pos1, pos2) {
@@ -215,27 +249,27 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         if ($scope.view === 'overview') {
           var scaleX = Math.min(0.75, wx / ($scope.bounds.spanX * STEP_X + SIZE_X + MARGIN_X * 2));
           var scaleY = Math.min(0.75, wy / ($scope.bounds.spanY * STEP_Y + SIZE_Y + MARGIN_Y * 2));
+          var center = $scope.transition ?
+            $scope.transition.pos : {x: $scope.bounds.centerX, y: $scope.bounds.centerY};
           var transformOrigin = $interpolate('{{cx}}px {{cy}}px')({
-            cx: $scope.bounds.centerX * STEP_X,
-            cy: $scope.bounds.centerY * STEP_Y
+            cx: center.x * STEP_X, cy: center.y * STEP_Y
           });
           var transform = $interpolate('translate({{tx}}px,{{ty}}px) scale({{scale}})')({
             scale: Math.min(scaleX, scaleY),
-            tx: -$scope.bounds.centerX * STEP_X + wx / 2,
-            ty: -$scope.bounds.centerY * STEP_Y + wy / 2
+            tx: -center.x * STEP_X + wx / 2,
+            ty: -center.y * STEP_Y + wy / 2
           });
           return {
             'transform-origin': transformOrigin, '-webkit-transform-origin': transformOrigin,
             transform: transform, '-webkit-transform': transform,
           };
         } else if ($scope.view === 'detail') {
-          var frameLayout = $scope.arena.layout[$scope.focusedFrameKey];
+          var frameLayout = $scope.arena.layout[$scope.arenaStates.focusedFrameKey];
           var transform = $interpolate('translate({{tx}}px,{{ty}}px) scale(1)')({
             tx: -frameLayout.x * STEP_X + wx / 2,
             ty: -frameLayout.y * STEP_Y + wy / 2
           });
           return {
-            // 'transform-origin': transformOrigin, '-webkit-transform-origin': transformOrigin,
             transform: transform, '-webkit-transform': transform,
           };
         }
@@ -245,7 +279,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         if (!layout) return;
         var wx = viewport.innerWidth(), wy = viewport.innerHeight();
         var cx = layout.x * STEP_X, cy = layout.y * STEP_Y;
-        if (frameKey === $scope.focusedFrameKey) {
+        if (frameKey === $scope.arenaStates.focusedFrameKey) {
           var width = Math.min(1000, wx - MARGIN_X * 2);
           var height = wy - MARGIN_Y * 2;
           var transform = $interpolate('translate({{tx}}px,{{ty}}px)')({
@@ -266,7 +300,14 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         }
       }
 
-      function drawLink(sourceFrameLayout, destFrameLayout) {
+      function drawLink(sourceFrameLayout, destFrameLayout, color, opacity, lineWidth, dash) {
+        color = color || '0,180,0';
+        opacity = opacity || '.05';
+        lineWidth = lineWidth || 50;
+        ctx.save();
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = 'rgba(' + color + ',' + opacity + ')';
+        if (dash) ctx.setLineDash(dash);
         ctx.beginPath();
         ctx.moveTo(sourceFrameLayout.x * STEP_X, sourceFrameLayout.y * STEP_Y + HALF_Y);
         ctx.bezierCurveTo(
@@ -275,6 +316,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           destFrameLayout.x * STEP_X, destFrameLayout.y * STEP_Y - HALF_Y
         );
         ctx.stroke();
+        ctx.restore();
       }
 
       function drawConnections() {
@@ -293,7 +335,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           if (!frameLayout) return;
           var node = $scope.graph[frameKey];
           var childKeys = _.keys(node && node.childKeys), draftChildKeys = childKeys;
-          if ($scope.arenaStates[frameKey] && $scope.arenaStates[frameKey].mode !== 'explore') {
+          if ($scope.arenaStates.frames[frameKey] &&
+              $scope.arenaStates.frames[frameKey].mode !== 'explore') {
             draftChildKeys = _.chain($scope.draftChildren[frameKey])
               .reject(function(child) {return child.archived;})
               .pluck('frameKey')
@@ -303,20 +346,23 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           _.each(childKeys, function(childKey) {
             var childLayout = $scope.arena.layout[childKey];
             if (!childLayout) return;
-            var lineWidth = ctx.lineWidth;
-            var strokeStyle = ctx.strokeStyle;
+            var lineWidth;
+            var color;
+            var opacity;
             if (!_.contains(draftChildKeys, childKey)) {
               lineWidth = 25;
-              strokeStyle = 'rgba(180,0,0,0.05)';
+              color = '180,0,0';
             } else if (!(node && node.childKeys && node.childKeys[childKey])) {
               lineWidth = 25;
-              strokeStyle = 'rgba(0,0,180,0.05)';
+              color = '0,0,180';
             }
-            ctx.save();
-            ctx.lineWidth = lineWidth;
-            ctx.strokeStyle = strokeStyle;
-            drawLink(frameLayout, childLayout);
-            ctx.restore();
+            if ($scope.transition && (
+              frameKey === $scope.transition.from && childKey === $scope.transition.to ||
+              frameKey === $scope.transition.to && childKey === $scope.transition.from
+            )) {
+              opacity = 0.5;
+            }
+            drawLink(frameLayout, childLayout, color, opacity, lineWidth);
           });
           _.each(node && node.descendantKeys, function(unused, descendantKey) {
             var descendantLayout = $scope.arena.layout[descendantKey];
@@ -329,16 +375,13 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
             )) {
               return;
             }
-            ctx.save();
-            ctx.setLineDash([200, 20]);
-            drawLink(frameLayout, descendantLayout);
-            ctx.restore();
+            drawLink(frameLayout, descendantLayout, null, null, null, [200, 20]);
           });
         });
       }
 
       function updateView() {
-        if (!$scope.arena || !$scope.bounds) return;
+        if (!$scope.arena || !$scope.bounds || !$scope.arenaStates) return;
         $scope.viewportStyle = computeViewportStyle();
         $scope.frameWrapperStyles = {};
         _.each($scope.arena.layout, function(layout, frameKey) {
@@ -363,8 +406,9 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       }
 
       $scope.$watch('arena.layout', updateLayout, true);
-      $scope.$watch('[view, focusedFrameKey, notesToggle]', updateView, true);
-      $scope.$watch('[graph, draftChildren, arenaStates]', drawConnections, true);
+      $scope.$watch('[view, arenaStates.focusedFrameKey, notesToggle]', updateView, true);
+      $scope.$watch('[graph, draftChildren, arenaStates.frames]', drawConnections, true);
+      $scope.$watch('transition', drawConnections);
       $(window).on('resize', _.throttle(function() {$timeout(updateView);}, 400));
     }
   };
@@ -410,10 +454,54 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         director.autoplayNext(tidbitKey);
       };
 
+      function hasTransitionTidbit(frame, frameKey) {
+        var hasActiveChild = _.some(frame.children, function(child) {
+          return !child.archived && child.frameKey === frameKey;
+        });
+        return hasActiveChild && frame.tidbits[frameKey] && !frame.tidbits[frameKey].archived;
+      }
+
+      $scope.transition = function(targetFrameKey) {
+        var frame = $scope.mode === 'explore' ? $scope.frame : $scope.draft;
+        var data = {targetFrameKey: targetFrameKey, originFrameKey: $scope.frameKey};
+        if (hasTransitionTidbit(frame, targetFrameKey) &&
+            !$scope.stateScope.triggered[targetFrameKey]) {
+          data.triggerSpec = {
+            stateScope: $scope.stateScope, frameKey: $scope.frameKey, tidbitKey: targetFrameKey
+          };
+        } else if ($scope.mode === 'preview') {
+          // In preview mode, trigger only our own tidbits, since we don't know the target's mode.
+          data.draftOnly = true;
+        }
+        $scope.$emit('transition', data);
+      };
+
+      $scope.$on('transition', function(event, data) {
+        if (data.targetFrameKey !== $scope.frameKey) return;
+        var frame = $scope.mode === 'explore' ? $scope.frame : $scope.draft;
+        var preferredAuthorKey = $scope.mode === 'explore' ? null : user.currentUserKey;
+        if (data.triggerSpec) {
+          // We are a child of the origin frame, and it has a relevant tidbit; play it.
+          guidance.trigger(
+            data.triggerSpec.stateScope, data.triggerSpec.frameKey, data.triggerSpec.tidbitKey,
+            $scope.stateUserKey, false, preferredAuthorKey, 'frames', $scope.frameKey);
+          director.autoplayNext(data.triggerSpec.tidbitKey);
+        } else if (hasTransitionTidbit(frame, data.originFrameKey) &&
+                   !$scope.stateScope.triggered[data.originFrameKey]) {
+          if (data.draftOnly && $scope.mode === 'explore') return;
+          // We are a parent of the origin frame, and we have a relevant tidbit; play it.
+          guidance.trigger(
+            $scope.stateScope, $scope.frameKey, data.originFrameKey, $scope.stateUserKey, false,
+            preferredAuthorKey);
+          director.autoplayNext(data.originFrameKey);
+        }
+      });
+
       function createStateScope(frameSet) {
         var stateScope = $scope.$new(true);
         _.extend(stateScope, {input: {}, outcome: {}, triggered: {}, completed: {}});
         stateScope.trigger = $scope.trigger;
+        stateScope.transition = $scope.transition;
         stateScope.frameSet = frameSet;
         var unwatch = [
           $scope.$watch('frameKey', function(value) {stateScope.frameKey = value;}),
@@ -484,6 +572,12 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       }
 
       function syncDraftTidbitKeys() {
+        if (!$scope.draft) {
+          handles.draft.ready().then(function() {
+            syncDraftTidbitKeys();
+          });
+          return;
+        }
         if (!$scope.draft.tidbits || detectDuplicateTidbits()) return;
         var badPairs = _.filter(_.pairs($scope.draft.tidbits), function(pair) {
           return pair[1] && pair[1].id !== pair[0];
@@ -510,7 +604,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           if (!child.archived) childrenKeys[child.frameKey] = 1;
         });
         fire.ref($scope, 'graph/{{frameKey}}/childKeys').set(childrenKeys);
-        $scope.toggleEdit();
+        $scope.mode = 'explore';
       };
 
       $scope.isDraftChanged = function() {
@@ -631,6 +725,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           var tidbit = $scope.draft.tidbits[child.frameKey];
           if (tidbit) tidbit.archived = value;
         }
+      };
+
+      $scope.visitChild = function(frameKey) {
+        $scope.$emit('frameAdded', frameKey, undefined, true);
       };
 
       $scope.isChildPublished = function(childKey) {
@@ -834,13 +932,23 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
     scope: true,
     link: function($scope, element, attrs, controller) {
       var contentScope;
-      $scope.$watch(attrs.lfFrameContent + '.core.content', function(newValue) {
-        element.html(newValue);
+
+      function bindContent(content) {
+        if (!$scope.stateScope) {
+          var unwatch = $scope.$watch('stateScope', function() {
+            unwatch();
+            bindContent(content);
+          });
+          return;
+        }
+        element.html(content);
         if (contentScope) contentScope.$destroy();
         contentScope = $scope.stateScope.$new();
         $compile(element.contents())(contentScope);
         contentScope.$watch('input', runAnalyzer, true);
-      });
+      };
+
+      $scope.$watch(attrs.lfFrameContent + '.core.content', bindContent);
 
       function clearAnalyzeIndicatorBit() {
         $scope.stateScope._analyzing = false;
@@ -996,7 +1104,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         frame: {pull: '{{frameSet}}/{{frameKey}}'},
         tidbitMessages: {
           pull: 'chats/personalTidbits/{{stateUserKey || user.currentUserKey}}/{{frameSet}}/' +
-                '{{frameKey}}/messages'
+                '{{frameKey}}/messages',
+          query: function(ref) {return ref.limit(maxMessages);}
         }
       });
 
@@ -1044,7 +1153,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         if (maxedKinds.length) {
           messages = _.filter(messages, function(message) {
             if (maxedKinds.length) maxedKinds = _.without(maxedKinds, message.kind);
-            return !!maxedKinds.length;
+            return !maxedKinds.length;
           });
         }
         return messages;
@@ -1222,12 +1331,14 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       function createFrame(title) {
         title = title || 'New frame';
         var stub = {core: {title: title, content: 'To be filled in...'}};
-        var frameKey = handles.frames.ref().push(stub).name();
+        var frameKey = handles.frames.ref().push().name();
+        frameKey = 'f' + frameKey;
+        handles.frames.ref(frameKey).set(stub);
         handles.drafts.ref(frameKey).set(stub);
         return frameKey;
       }
 
-      var createFrameLabelPrefix = '✦Create✦ ';
+      var createFrameLabelPrefix = '✦Create frame✦ ';
 
       $scope.matchFrames = function(term, callback) {
         fire.connect($scope, {
@@ -1252,12 +1363,14 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         event.preventDefault();
         event.stopPropagation();
         element.val('');
+        var mode = attrs.mode;
         var frameKey = item.value;
         if (frameKey === '#create') {
           frameKey = createFrame(item.label.slice(createFrameLabelPrefix.length));
+          mode = 'edit';
         }
         if ($scope.selectCallback) $scope.selectCallback({frameKey: frameKey});
-        $scope.$emit('frameAdded', frameKey, attrs.mode, 'focus' in attrs);
+        $scope.$emit('frameAdded', frameKey, mode, 'focus' in attrs);
       });
 
     }
@@ -1322,7 +1435,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
   }
 
   self.trigger = function(
-      stateScope, frameKey, tidbitKey, userKey, preferAlternative, preferredAuthorKey) {
+      stateScope, frameKey, tidbitKey, userKey, preferAlternative, preferredAuthorKey,
+      targetFrameSet, targetFrameKey) {
     if (!stateScope.triggered[tidbitKey]) {
       // Mark as triggered before blocking on data, so we don't end up triggering twice.
       stateScope.triggered[tidbitKey] = {$triggered: true};
@@ -1332,13 +1446,16 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         userKey: userKey,
         frameSet: stateScope.frameSet,
         frameKey: frameKey,
-        tidbitKey: tidbitKey
+        tidbitKey: tidbitKey,
+        targetFrameSet: targetFrameSet || stateScope.frameSet,
+        targetFrameKey: targetFrameKey || frameKey
       },
       {
         responses: {once: '{{frameSet}}/{{frameKey}}/tidbits/{{tidbitKey}}/responses'},
         votes: {once: 'votes/{{frameSet}}/{{frameKey}}/tidbits/{{tidbitKey}}/responses'},
         triggered: {noop: 'users/{{userKey}}/states/{{frameKey}}/triggered/{{tidbitKey}}'},
-        messages: {noop: 'chats/personalTidbits/{{userKey}}/{{frameSet}}/{{frameKey}}/messages'},
+        messages: {noop:
+          'chats/personalTidbits/{{userKey}}/{{targetFrameSet}}/{{targetFrameKey}}/messages'},
       }
     );
     handles.$allReady().then(function(result) {
@@ -1546,6 +1663,39 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       element.on('click', function(event) {
         event.preventDefault();
         $scope.trigger(attrs.lfTidbitLink);
+      });
+    }
+  };
+})
+
+.directive('lfFrameLink', function($timeout, fire) {
+  return {
+    scope: true,
+    link: function($scope, element, attrs, controller) {
+      element.filter('a').attr('href', '');
+      element.addClass('frame-link');
+      if (!element.html().trim()) {
+        attrs.$observe('lfFrameLink', function(value) {
+          $scope.targetFrameKey = value;
+        });
+        // Give time for frameKey to settle to avoid spurious "bad path" warnings.
+        $timeout(function() {
+          fire.connect($scope, {
+            title: {pull: 'frames/{{targetFrameKey}}/core/title'}
+          });
+        });
+        $scope.$watch('title', function(value) {
+          element.text(value);
+        });
+      }
+      element.on('click', function(event) {
+        event.preventDefault();
+        var frameKey = attrs.lfFrameLink;
+        $scope.$emit('frameAdded', frameKey, undefined, true);
+        // Give the target framet time to be created, if necessary.
+        $timeout(function() {
+          $scope.transition(frameKey);
+        });
       });
     }
   };

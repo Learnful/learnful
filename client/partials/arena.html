@@ -1,4 +1,5 @@
-<div class="arena" ng-class="[view, notesToggle ? 'show-notes' : '']">
+<div class="arena"
+     ng-class="[view, notesToggle ? 'show-notes' : '', transition.stage ? 'transition-' + transition.stage : '']">
   <div class="infostrip">
     <span class="logo">Learnful</span>
     <div lf-frame-finder focus placeholder="What do you want to learn or teach?"></div>
@@ -21,20 +22,20 @@
     <div class="notes-text proportional-font" lf-code-editor ng-model="arena.notes"
          placeholder="A place for notes related to this workspace."></div>
     <div class="viewport-button edit-frame icon-button fa fa-pencil"
-     ng-class="{on: arenaStates[focusedFrameKey].mode &amp;&amp; arenaStates[focusedFrameKey].mode !== 'explore'}"
+     ng-class="{on: arenaStates.frames[arenaStates.focusedFrameKey].mode &amp;&amp; arenaStates.frames[arenaStates.focusedFrameKey].mode !== 'explore'}"
      ng-click="toggleEdit()" title="Toggle edit mode"></div>
   </div>
   <div class="loading">Loading...</div>
   <div class="viewport" ng-style="viewportStyle" style="opacity: 0">
     <canvas class="frame-connections"></canvas>
     <div ng-repeat="(frameKey, layout) in arena.layout" class="frame-wrapper"
-         ng-class="{focused: focusedFrameKey === frameKey, editing: arenaStates[frameKey].mode &amp;&amp; arenaStates[frameKey].mode !== 'explore'}"
+         ng-class="{focused: arenaStates.focusedFrameKey === frameKey, editing: arenaStates.frames[frameKey].mode &amp;&amp; arenaStates.frames[frameKey].mode !== 'explore'}"
          ng-style="frameWrapperStyles[frameKey]">
       <div class="frame-scaler">
         <div lf-frame="frameKey"
-             mode="arenaStates[frameKey].mode"
+             mode="arenaStates.frames[frameKey].mode"
              state-user-key="arena.ownerKey || user.currentUserKey"
-             focused="focusedFrameKey === frameKey"></div>
+             focused="arenaStates.focusedFrameKey === frameKey"></div>
         <div class="frame-cover" ng-click="focus(frameKey)"></div>
         <div class="frame-hide-button icon-button fa fa-times-circle" ng-click="hideFrame(frameKey)"
              title="Remove this frame from the workspace (does not delete it)."></div>

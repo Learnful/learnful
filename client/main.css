@@ -186,6 +186,16 @@ input {
   transition-timing-function: ease-in-out;
 }
 
+.arena.transition-begin .viewport {
+  transition-duration: .5s;
+  transition-timing-function: ease-in;
+}
+
+.arena.transition-end .viewport {
+  transition-duration: .5s;
+  transition-timing-function: ease-out;
+}
+
 .detail .frame-wrapper {
   opacity: 0;
 }
@@ -216,25 +226,25 @@ input {
 
 .arena .zoom-out {
   position: fixed;
-  bottom: 0;
+  bottom: -55px;
   left: 0;
   border-top-right-radius: 15px;
 }
 
-.overview .zoom-out {
-  bottom: -55px;
+.detail .zoom-out {
+  bottom: 0;
 }
 
 .arena .edit-frame {
   position: absolute;
-  bottom: 0;
+  bottom: -55px;
   left: -50px;
   z-index: 1;
   border-top-left-radius: 15px;
 }
 
-.overview .edit-frame {
-  bottom: -55px;
+.detail .edit-frame {
+  bottom: 0;
 }
 
 .arena .frame-connections {
@@ -687,11 +697,11 @@ input {
   clear: left;
 }
 
-.tidbit-link {
+.tidbit-link, .frame-link {
   border-bottom: 1px blue dotted;
 }
 
-a.tidbit-link, a.tidbit-link:visited {
+a.tidbit-link, a.tidbit-link:visited, a.frame-link, a.frame-link:visited {
   color: inherit;
   text-decoration: none;
 }

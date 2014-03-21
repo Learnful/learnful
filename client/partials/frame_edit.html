@@ -1,9 +1,12 @@
+<div class="section" style="text-align: center; font-size: small;">
+  Frame ID: <input disabled style="width: 200px;" value="{{frameKey}}"/>
+</div>
 <h5>Content</h5>
 <div class="section" lf-code-editor ng-model="draft.core.content" mode="htmlmixed"></div>
 <h5>Analyzer</h5>
 <div class="section" lf-code-editor ng-model="draft.analyzerCode" mode="javascript"></div>
 <h5>
-  Feedback
+  Tidbits
   <label style="float: right; font-size: 80%;">
     <input type="checkbox" ng-model="showArchived.tidbits" style="vertical-align: top"/>
     Show archived
@@ -58,9 +61,9 @@
       <tr>
         <th style="width: 50px"></th>
         <th>Title</th>
-        <th>Transitions</th>
+        <th title="Transitions">Trans.</th>
         <th title="Archived?" style="width: 20px">A?</th>
-        <th style="width: 75px"></th>
+        <th style="width: 100px"></th>
       </tr>
       <tr ng-repeat-start="child in getSortedDraftChildren()"
           ng-init="tidbit = draft.tidbits[child.frameKey]"
@@ -98,15 +101,17 @@
               </div>
             </div>
           </div>
+          <div class="pure-button small-button" ng-click="visitChild(child.frameKey); $event.stopPropagation()">Go</div>
         </td>
       </tr>
       <tr ng-repeat-end ng-if="expandedChildren[child.$key]">
         <td colspan="5">
+          <div>Child frame ID: {{child.frameKey}}</div>
           <div class="tidbit-details" ng-include="'partials/frame_edit_tidbit_responses.html'">
           </div>
         </td>
       </tr>
     </tbody>
   </table>
-  <div lf-frame-finder="addChild(frameKey)" mode="edit" placeholder="Add underlying skill"></div>
+  <div lf-frame-finder="addChild(frameKey)" mode="edit" placeholder="Add underlying skill" style="width: 50%"></div>
 </div>

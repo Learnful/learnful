@@ -313,7 +313,10 @@ angular.module('altfire', [])
     }
 
     function onLocalChange(path, newValue) {
-      if (!self.isReady) return;  // will get merged in when remote value first comes in
+      if (!self.isReady && !angular.isObject(newValue)) {
+        // will get merged in when remote value first comes in
+        return;
+      }
 
       var childRef = getRefFromPath(path);
       newValue = fireCopy(newValue);
