@@ -24,6 +24,7 @@
     "codemirror": "~3.22.0",
     "jshint": "~2.4.4",
     "Recorderjs": "mattdiamond/Recorderjs",
-    "purecss": "~0.4.2"
+    "purecss": "~0.4.2",
+    "normalize-css": "~3.0.0"
   }
 }

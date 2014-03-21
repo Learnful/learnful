@@ -22,9 +22,9 @@
   <script src="altfire.js"></script>
   <script src="modal.js"></script>
   <script src="main.js"></script>
-  <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.4.2/base-min.css">
   <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css"/>
   <link rel="stylesheet" href="libs/ui-lightness/jquery-ui-1.10.4.custom.min.css"/>
+  <link rel="stylesheet" href="bower_components/normalize-css/normalize.css">
   <link rel="stylesheet" href="bower_components/purecss/build/pure-nr-min.css"/>
   <link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css"/>
   <link rel="stylesheet" href="bower_components/codemirror/addon/lint/lint.css"/>
@@ -32,8 +32,8 @@
   <link rel="stylesheet" href="main.css"/>
 </head>
 
-<body>
-  <div lf-arena="a1"></div>
+<body ng-controller="lfRoot">
+  <div lf-arena="currentArenaKey"></div>
   <div modal-dialog="responseEditor" disable-backdrop-cancel="on">
     <div ng-include="'partials/response_editor.html'"></div>
   </div>

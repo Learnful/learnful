@@ -1,11 +1,13 @@
 angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
 .constant('config', _.extend({
-  audioRecorder: {workerPath: '/bower_components/Recorderjs/recorderWorker.js'}
-}, window.location.hostname === 'learnful.co' ? {
+  audioRecorder: {workerPath: '/bower_components/Recorderjs/recorderWorker.js'},
+}, window.location.hostname.match(/.?learnful.co$/) ? {
+  prod: true,
   firebase: 'https://learnful.firebaseio.com/',
   s3Media: 'https://s3.amazonaws.com/learnful-media.co/'
 } : {
+  prod: false,
   firebase: 'https://rebase.firebaseio.com/',
   s3Media: 'https://s3.amazonaws.com/learnful-media-dev.co/'
 }))
@@ -36,11 +38,19 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
   ]);
 })
 
+.controller('lfRoot', function($scope, fire, user) {
+  $scope.user = user;
+  $scope.currentArenaKey = 'a-' + user.currentUserKey;
+  var handles = fire.connect($scope, {
+    currentArenaKey: {bind: 'users/{{user.currentUserKey}}/currentArenaKey'}
+  });
+})
+
 .directive('lfArena', function($timeout, $interpolate) {
   return {
     templateUrl: 'partials/arena.html',
-    scope: {arenaKey: '@lfArena'},
-    controller: function($scope, $q, fire, user, search) {
+    scope: {arenaKey: '=lfArena'},
+    controller: function($scope, $q, fire, user, search, config) {
       $scope.user = user;
       $scope.notesToggle = false;
       $scope.view = null;  // choices: overview, detail
@@ -54,7 +64,11 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       });
 
       $q.all(handles.arena.ready(), handles.arenaStates.ready()).then(function() {
-        if (!$scope.arena.layout) $scope.arena.layout = {};
+        if (!$scope.arena) $scope.arena = {};
+        if (!$scope.arena.layout) {
+          $scope.arena.layout = {};
+          $scope.arena.layout[config.prod ? 'f-JIaleLgoVqzl4oJJdUe' : 'f1'] = {x: 0, y: 0};
+        }
         if (!$scope.arenaStates) $scope.arenaStates = {frames: {}};
         $scope.view = $scope.arenaStates.focusedFrameKey ? 'detail' : 'overview';
         _.each($scope.arena.layout, function(layout, frameKey) {
@@ -247,8 +261,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       function computeViewportStyle() {
         var wx = viewport.innerWidth(), wy = viewport.innerHeight();
         if ($scope.view === 'overview') {
-          var scaleX = Math.min(0.75, wx / ($scope.bounds.spanX * STEP_X + SIZE_X + MARGIN_X * 2));
-          var scaleY = Math.min(0.75, wy / ($scope.bounds.spanY * STEP_Y + SIZE_Y + MARGIN_Y * 2));
+          var scaleX = Math.min(0.65, wx / ($scope.bounds.spanX * STEP_X + SIZE_X + MARGIN_X * 2));
+          var scaleY = Math.min(0.65, wy / ($scope.bounds.spanY * STEP_Y + SIZE_Y + MARGIN_Y * 2));
           var center = $scope.transition ?
             $scope.transition.pos : {x: $scope.bounds.centerX, y: $scope.bounds.centerY};
           var transformOrigin = $interpolate('{{cx}}px {{cy}}px')({
@@ -1314,7 +1328,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
     self.currentUserKey = self.data.currentUserKey = userKey;
     self.data.persona = {
       name: 'Guest ' + userKey,
-      avatar: 'https://robohash.org/' + userKey + '.png?set=set3&size=40x40'
+      avatar: 'https://robohash.org/' + userKey + '.png?set=set3&size=40x40',
     };
     handles = fire.connect(self.data, {
       persona: {bind: 'users/{{currentUserKey}}/persona'},
@@ -1360,7 +1374,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         return frameKey;
       }
 
-      var createFrameLabelPrefix = '✦Create frame✦ ';
+      var createFrameLabelPrefix = '\u2726Create frame\u2726 ';
 
       $scope.matchFrames = function(term, callback) {
         fire.connect($scope, {

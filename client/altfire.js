@@ -358,8 +358,12 @@ angular.module('altfire', [])
       if (!self.isReady) {
         //First time value comes, merge it in and push it
         scope[name] = fireMerge(value, scope[name]);
-        if (connectionFlavor === 'bind') onLocalChange([], scope[name]);
         setReady();
+        if (connectionFlavor === 'bind') {
+          self.ready().then(function() {
+             onLocalChange([], scope[name]);
+          });
+        }
       } else if (!angular.isObject(value) || !angular.isObject(scope[name])) {
         scope[name] = value;
         reporter && (reporter.savedScope[name] = angular.copy(value));
