@@ -628,7 +628,8 @@ input {
 
 .chatroom .chat-history {
   position: absolute;
-  top: 45px; bottom: 45px;
+  top: 45px; 
+  bottom: 61px;
   left: 0; right: 0;
   overflow-y: scroll;
 }
@@ -640,8 +641,9 @@ input {
 .chatroom .chat-input {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 40px;
+  height: 56px;
   display: flex;
+  flex-direction: row;
 }
 
 .overview .chatroom .chat-input, .overview .chatroom .chat-input > * {
@@ -682,9 +684,9 @@ input {
 }
 
 .chatroom .tidbit-avatar {
-  filter: grayscale(.6);
-  -webkit-filter: grayscale(.6);
-  -moz-filter: grayscale(.6);
+  filter: grayscale(.7);
+  -webkit-filter: grayscale(.7);
+  -moz-filter: grayscale(.7);
 }
 
 .chatroom .private {

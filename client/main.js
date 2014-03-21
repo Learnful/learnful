@@ -119,11 +119,11 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         });
       });
 
-      $scope.$on('transition', function(event, data) {
+      $scope.$on('completeTransition', function(event, data) {
         if (!data.reflected) {
           data.reflected = true;
           // Bounce the transition back down, so it can find its target frame.
-          $scope.$broadcast('transition', data);
+          $scope.$broadcast('completeTransition', data);
         }
       });
 
@@ -446,6 +446,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       handles.frame.ready().then(function() {moveContentToCore($scope.frame);});
       handles.draft.ready().then(function() {moveContentToCore($scope.draft);});
 
+      $scope.$on('trigger', function(event, args) {
+        $scope.trigger(args.tidbitKey, args.preferAlternative);
+      });
+
       $scope.trigger = function(tidbitKey, preferAlternative) {
         var preferredAuthorKey = $scope.mode === 'explore' ? null : user.currentUserKey;
         guidance.trigger(
@@ -453,6 +457,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           preferAlternative, preferredAuthorKey);
         director.autoplayNext(tidbitKey);
       };
+
+      $scope.$on('transition', function(event, args) {
+        $scope.transition(args.targetFrameKey);
+      });
 
       function hasTransitionTidbit(frame, frameKey) {
         var hasActiveChild = _.some(frame.children, function(child) {
@@ -462,21 +470,25 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       }
 
       $scope.transition = function(targetFrameKey) {
-        var frame = $scope.mode === 'explore' ? $scope.frame : $scope.draft;
-        var data = {targetFrameKey: targetFrameKey, originFrameKey: $scope.frameKey};
-        if (hasTransitionTidbit(frame, targetFrameKey) &&
-            !$scope.stateScope.triggered[targetFrameKey]) {
-          data.triggerSpec = {
-            stateScope: $scope.stateScope, frameKey: $scope.frameKey, tidbitKey: targetFrameKey
-          };
-        } else if ($scope.mode === 'preview') {
-          // In preview mode, trigger only our own tidbits, since we don't know the target's mode.
-          data.draftOnly = true;
-        }
-        $scope.$emit('transition', data);
+        $scope.$emit('frameAdded', targetFrameKey, undefined, true);
+        // Give the target frame time to be created, if necessary.
+        $timeout(function() {
+          var frame = $scope.mode === 'explore' ? $scope.frame : $scope.draft;
+          var data = {targetFrameKey: targetFrameKey, originFrameKey: $scope.frameKey};
+          if (hasTransitionTidbit(frame, targetFrameKey) &&
+              !$scope.stateScope.triggered[targetFrameKey]) {
+            data.triggerSpec = {
+              stateScope: $scope.stateScope, frameKey: $scope.frameKey, tidbitKey: targetFrameKey
+            };
+          } else if ($scope.mode === 'preview') {
+            // In preview mode, trigger only our own tidbits, since we don't know the target's mode.
+            data.draftOnly = true;
+          }
+          $scope.$emit('completeTransition', data);
+        });
       };
 
-      $scope.$on('transition', function(event, data) {
+      $scope.$on('completeTransition', function(event, data) {
         if (data.targetFrameKey !== $scope.frameKey) return;
         var frame = $scope.mode === 'explore' ? $scope.frame : $scope.draft;
         var preferredAuthorKey = $scope.mode === 'explore' ? null : user.currentUserKey;
@@ -484,7 +496,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           // We are a child of the origin frame, and it has a relevant tidbit; play it.
           guidance.trigger(
             data.triggerSpec.stateScope, data.triggerSpec.frameKey, data.triggerSpec.tidbitKey,
-            $scope.stateUserKey, false, preferredAuthorKey, 'frames', $scope.frameKey);
+            $scope.stateUserKey, false, preferredAuthorKey, $scope.stateScope.frameSet,
+            $scope.frameKey);
           director.autoplayNext(data.triggerSpec.tidbitKey);
         } else if (hasTransitionTidbit(frame, data.originFrameKey) &&
                    !$scope.stateScope.triggered[data.originFrameKey]) {
@@ -500,8 +513,6 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       function createStateScope(frameSet) {
         var stateScope = $scope.$new(true);
         _.extend(stateScope, {input: {}, outcome: {}, triggered: {}, completed: {}});
-        stateScope.trigger = $scope.trigger;
-        stateScope.transition = $scope.transition;
         stateScope.frameSet = frameSet;
         var unwatch = [
           $scope.$watch('frameKey', function(value) {stateScope.frameKey = value;}),
@@ -521,10 +532,6 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       }
 
       var frameStateScope = createStateScope('frames');
-
-      $scope.$on('trigger', function(event, args) {
-        $scope.trigger(args.tidbitKey, args.preferAlternative);
-      });
 
       $scope.switchMode = function(mode) {
         $scope.mode = mode;
@@ -1102,6 +1109,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         participantKeys: {pull: 'chats/{{getName()}}/participantKeys'},
         connected: {pull: '.info/connected'},
         frame: {pull: '{{frameSet}}/{{frameKey}}'},
+        childrenTitles: {
+          pull: '{{frameSet}}/#/core/title', viaValues: '{{frameSet}}/{{frameKey}}/children',
+          viaValueExtractor: function(child) {return child.frameKey;}
+        },
         tidbitMessages: {
           pull: 'chats/personalTidbits/{{stateUserKey || user.currentUserKey}}/{{frameSet}}/' +
                 '{{frameKey}}/messages',
@@ -1177,8 +1188,14 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         if ($scope.frame && $scope.frame.tidbits) {
           var choices = {};
           _.each($scope.frame.tidbits, function(tidbit, tidbitKey) {
-            if (tidbit.findable && tidbit.question && tidbit.responses) {
-              choices[tidbitKey] = tidbit.question;
+            if (tidbit && tidbit.findable && !tidbit.archived && tidbit.question &&
+                tidbit.responses) {
+              choices[tidbitKey] = '[!] ' + tidbit.question;
+            }
+          });
+          _.each($scope.frame.children, function(child) {
+            if (child && !child.archived && $scope.childrenTitles[child.frameKey]) {
+              choices[child.frameKey] = '[>] ' + $scope.childrenTitles[child.frameKey];
             }
           });
           items = search.find(term, choices, 3);
@@ -1190,7 +1207,12 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         event.preventDefault();
         event.stopPropagation();
         $scope.userMessage = '';  // prevents message from being sent
-        $scope.sendTidbit(item.value);
+        var tidbit = $scope.frame.tidbits[item.value];
+        if (tidbit && tidbit.purpose === 'advice') {
+          $scope.sendTidbit(item.value);
+        } else if (!tidbit || tidbit.purpose === 'transition') {
+          $scope.$emit('transition', {targetFrameKey: item.value});
+        }
       });
       $scope.$on('ac-focus', function(event, item) {
         event.preventDefault();
@@ -1461,7 +1483,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
     handles.$allReady().then(function(result) {
       if (!result.responses) return;
       var responseKey = selectResponse(
-        result.responses, result.votes, stateScope.triggered, preferAlternative,
+        result.responses, result.votes, stateScope.triggered[tidbitKey], preferAlternative,
         preferredAuthorKey);
       if (stateScope.frameSet === 'frames') {
         handles.triggered.ref(responseKey, 'lastTriggerTime').set(Firebase.ServerValue.TIMESTAMP);
@@ -1662,7 +1684,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       }
       element.on('click', function(event) {
         event.preventDefault();
-        $scope.trigger(attrs.lfTidbitLink);
+        $scope.$emit('trigger', {tidbitKey: attrs.lfTidbitLink});
       });
     }
   };
@@ -1690,12 +1712,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       }
       element.on('click', function(event) {
         event.preventDefault();
-        var frameKey = attrs.lfFrameLink;
-        $scope.$emit('frameAdded', frameKey, undefined, true);
-        // Give the target framet time to be created, if necessary.
-        $timeout(function() {
-          $scope.transition(frameKey);
-        });
+        $scope.$emit('transition', {targetFrameKey: attrs.lfFrameLink});
       });
     }
   };
