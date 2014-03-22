@@ -72,6 +72,9 @@ angular.module('altfire', [])
   };
 
   self.connectOne = function(args) {
+    if (!args.name) {
+      throw new Error('Must provide a name for the connection.');
+    }
     if (('bind' in args) + ('pull' in args) + ('once' in args) + ('noop' in args) !== 1) {
       throw new Error(
         'Each connection must specify exactly one of "bind", "pull", "once" and "noop".');
@@ -136,8 +139,9 @@ angular.module('altfire', [])
         });
       } else if (iPath && (!viaPath || iViaPath)) {
         fire = iViaPath ?
-          Fire(args.scope, args.name, connectionFlavor, iPath, viaFlavor, applyQuery(
-            new Firebase(iViaPath)), args.viaValueExtractor) :
+          Fire(
+            args.scope, args.name, connectionFlavor, iPath, viaFlavor,
+            applyQuery(new Firebase(iViaPath)), args.viaValueExtractor) :
           Fire(args.scope, args.name, connectionFlavor, applyQuery(new Firebase(iPath)));
       }
     });
@@ -213,6 +217,13 @@ angular.module('altfire', [])
     //Resolved once initial value comes down
     var readyDeferred = $q.defer();
 
+    scope.$on && scope.$on('$destroy', destroy);
+    self.destroy = destroy;
+    self.isReady = false;
+    self.ready = function() {
+      return readyDeferred.promise;
+    };
+
     if (filterRef) {
       self.allowedKeys = {};
       var filterPath = ref;
@@ -224,13 +235,6 @@ angular.module('altfire', [])
       firebaseBindRef([], onRootValue);
       self.ref = ref;
     }
-
-    scope.$on && scope.$on('$destroy', destroy);
-    self.destroy = destroy;
-    self.isReady = false;
-    self.ready = function() {
-      return readyDeferred.promise;
-    };
 
     var reporter, unbindWatch;
     if (connectionFlavor === 'bind') {
@@ -376,6 +380,10 @@ angular.module('altfire', [])
       return function onValue(value) {
         if (!angular.isObject(value) || !angular.isObject(scope[name] && scope[name][key])) {
           function update() {
+            if (angular.isUndefined(scope[name])) {
+              // We got destroyed while waiting for the callback, ignore.
+              return;
+            }
             scope[name][key] = value;
             reporter && (reporter.savedScope[name][key] = angular.copy(value));
             setReady();
@@ -578,7 +586,6 @@ angular.module('altfire', [])
     function reportChange(path, newValue) {
       if (newValue === undefined) newValue = null;
       path.shift(); // first item in path is the `name`, we don't need this
-      // console.log('reportChange', name, path.length ? path.join('/') : '', newValue);
       callback(path, newValue);
     }
 

@@ -432,7 +432,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
   return {
     templateUrl: 'partials/frame.html',
     scope: {frameKey: '=lfFrame', stateUserKey: '=', focused: '=', mode: '='},
-    controller: function($scope, $timeout, fire, modal, user, guidance, director) {
+    controller: function($scope, $timeout, fire, modal, user, guidance, director, completion) {
       $scope.user = user;
       $scope.stateScope = null;
       $scope.expandedTidbits = {};
@@ -447,6 +447,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           pull: 'frames/#/core', viaValues: 'drafts/{{frameKey}}/children',
           viaValueExtractor: function(child) {return child.frameKey;}
         },
+        completed: {bind: 'users/{{stateUserKey}}/completions/{{frameKey}}'},
         votes: {pull: 'votes/frames/{{frameKey}}'}
       });
 
@@ -463,6 +464,43 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       $scope.$on('trigger', function(event, args) {
         $scope.trigger(args.tidbitKey, args.preferAlternative);
       });
+
+      $scope.$watch('[stateUserKey, frame.children]', function() {
+        if ($scope.completion) $scope.completion.destroy();
+        if ($scope.stateUserKey) {
+          $scope.completion = completion($scope.stateUserKey, $scope);
+          if ($scope.frame && $scope.frame.children) {
+            $scope.completion.track(
+              _.chain($scope.frame.children)
+                .reject(function(child) {return child.archived;}).pluck('frameKey').value());
+          }
+        }
+      }, true);
+
+      $scope.getLowestChildCompletionLevel = function() {
+        return _.min(_.values($scope.completion.getAllCompletionLevels()));
+      };
+
+      $scope.hasAvailableChild = function() {
+        return !_.every(_.pluck($scope.frame && $scope.frame.children, 'archived'));
+      }
+
+      $scope.goToIncompleteChild = function() {
+        guidance.nextDeeperFrame($scope.frameKey, $scope.stateUserKey).then(function(nextFrameKey) {
+          if (nextFrameKey) $scope.transition(nextFrameKey);
+        });
+      };
+
+      $scope.completeAndGoToParent = function() {
+        $scope.completed = true;
+        guidance.nextHigherFrame($scope.frameKey, $scope.stateUserKey).then(function(nextFrameKey) {
+          if (nextFrameKey) {
+            $scope.transition(nextFrameKey);
+          } else {
+            alert('No parent found -- we would now pick a frame at random that relates to the other frames in this workspace.');
+          }
+        });
+      };
 
       $scope.trigger = function(tidbitKey, preferAlternative) {
         var preferredAuthorKey = $scope.mode === 'explore' ? null : user.currentUserKey;
@@ -920,28 +958,102 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
   };
 })
 
+.factory('completion', function($q, fire) {
+  var CompletionTracker = function(userKey, scope) {
+    this.userKey = userKey;
+    this.handles = {};
+    this.completions = {};
+    if (scope) {
+      this.unwatch = scope.$on('$destroy', _.bind(this.destroy, this));
+    }
+  };
+
+  CompletionTracker.prototype.track = function(frameKeys) {
+    _.each(_.keys(this.handles), function(key) {
+      if (!_.contains(frameKeys, key)) {
+        this.handles[key].$destroyAll();
+        delete this.handles[key];
+        delete this.completions[key];
+      }
+    }, this);
+    _.each(_.compact(frameKeys), function(key) {
+      if (!_.has(this.handles, key)) {
+        this.completions[key] = {};
+        var pathScope = {userKey: this.userKey, frameKey: key};
+        this.handles[key] = fire.connect(this.completions[key], {
+          completed: {pull: 'users/{{userKey}}/completions/{{frameKey}}', pathScope: pathScope},
+          ancestorCompletions: {
+            pull: 'users/{{userKey}}/completions/#', viaKeys: 'graph/{{frameKey}}/ancestorKeys',
+            pathScope: pathScope
+          }
+        });
+      }
+    }, this);
+    return this;
+  };
+
+  CompletionTracker.prototype.ready = function() {
+    var self = this;
+    return $q.all(_.invoke(this.handles, '$allReady')).then(function() {return self;});
+  };
+
+  CompletionTracker.prototype.checkTracking = function(frameKey) {
+    if (!_.has(this.completions, frameKey)) {
+      throw new Error('Not tracking completion of ' + frameKey);
+    }
+  };
+
+  CompletionTracker.prototype.getLevel = function(frameKey) {
+    this.checkTracking(frameKey);
+    if (this.completions[frameKey].completed) return 2;
+    if (_.any(this.completions[frameKey].ancestorCompletions)) return 1;
+    return 0;
+  };
+
+  CompletionTracker.prototype.getAllCompletionLevels = function() {
+    var levels = {};
+    _.each(_.keys(this.completions), function(frameKey) {
+      levels[frameKey] = this.getLevel(frameKey);
+    }, this);
+    return levels;
+  };
+
+  CompletionTracker.prototype.setCompleted = function(frameKey, value) {
+    this.checkTracking(frameKey);
+    this.handles[frameKey].completed.ref().set(value);
+  };
+
+  CompletionTracker.prototype.toggleCompleted = function(frameKey) {
+    this.checkTracking(frameKey);
+    this.setCompleted(frameKey, !this.completions[frameKey].completed);
+  };
+
+  CompletionTracker.prototype.destroy = function() {
+    _.each(this.handles, function(handle) {handle.$destroyAll();}, this);
+    this.userKey = null;
+    this.handles = {};
+    this.completions = {};
+    if (this.unwatch) {
+      this.unwatch();
+      this.unwatch = null;
+    }
+  };
+
+  return function(userKey, scope) {return new CompletionTracker(userKey, scope);};
+})
+
 .directive('lfCompletion', function() {
   return {
     templateUrl: 'partials/completion.html',
     scope: {frameKey: '=lfCompletion', stateUserKey: '=', control: '@'},
-    controller: function($scope, fire) {
-      fire.connect($scope, {
-        completed: {bind: 'users/{{stateUserKey}}/completions/{{frameKey}}'},
-        ancestorCompletions: {
-          pull: 'users/{{stateUserKey}}/completions/#', viaKeys: 'graph/{{frameKey}}/ancestorKeys'
-        }
-      });
-
-      $scope.getCompletionLevel = function() {
-        if ($scope.completed) return 2;
-        if (_.any(_.values($scope.ancestorCompletions))) return 1;
-        return 0;
-      };
+    controller: function($scope, completion) {
+      $scope.$watch('[frameKey, stateUserKey]', function() {
+        if ($scope.completion) $scope.completion.destroy();
+        $scope.completion = completion($scope.stateUserKey, $scope).track([$scope.frameKey]);
+      }, true);
 
       $scope.toggleCompletion = function() {
-        if ($scope.control === 'mutable') {
-          $scope.completed = !$scope.completed;
-        }
+        if ($scope.control === 'mutable') $scope.completion.toggleCompleted($scope.frameKey);
       };
     }
   };
@@ -1413,7 +1525,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
   };
 })
 
-.factory('guidance', function(fire, user) {
+.factory('guidance', function($q, fire, user, completion) {
   var self = {};
 
   function selectResponse(responses, votes, triggered, preferAlternative, preferredAuthorKey) {
@@ -1551,6 +1663,50 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         });
       }
     });
+  };
+
+  self.nextDeeperFrame = function(frameKey, userKey) {
+    var deferred = $q.defer();
+    var handles = fire.connect(
+      {frameKey: frameKey}, {children: {once: 'frames/{{frameKey}}/children'}}
+    ).$allReady().then(function(result) {
+      var children = _.chain(result.children)
+        .values().compact().select(function(child) {return !child.archived;})
+        .sortBy('order').value();
+      if (_.isEmpty(children)) {
+        deferred.resolve();
+      } else {
+        completion(userKey).track(_.pluck(children, 'frameKey')).ready().then(function(tracker) {
+          deferred.resolve(_.min(
+            children, function(child) {return tracker.getLevel(child.frameKey);}
+          ).frameKey);
+          tracker.destroy();
+        });
+      }
+    });
+    return deferred.promise;
+  };
+
+  self.nextHigherFrame = function(frameKey, userKey) {
+    var deferred = $q.defer();
+    var handles = fire.connect(
+      {frameKey: frameKey}, {parentKeys: {once: 'graph/{{frameKey}}/parentKeys'}}
+    ).$allReady().then(function(result) {
+      if (!result.parentKeys) {
+        deferred.resolve();
+      } else {
+        var parentKeys = _.keys(result.parentKeys);
+        completion(userKey).track(parentKeys).ready().then(function(tracker) {
+          var minCompletionLevel = Math.min(_.map(
+            parentKeys, function(key) {return tracker.getLevel(key);}));
+          parentKeys = _.filter(
+            parentKeys, function(key) {return tracker.getLevel(key) === minCompletionLevel;});
+          deferred.resolve(parentKeys[_.random(parentKeys.length - 1)]);
+          tracker.destroy();
+        });
+      }
+    });
+    return deferred.promise;
   };
 
   return self;

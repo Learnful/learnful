@@ -1,4 +1,4 @@
-<span ng-switch="getCompletionLevel()" class="completion"
+<span ng-switch="completion.getLevel(frameKey)" class="completion"
       ng-class="{'icon-button': control === 'mutable', dimmed: control === 'static'}"
       tooltip="{{control === 'mutable' ? (completed ? 'Mark as incomplete' : 'Mark as complete') : ''}}"
       ng-click="toggleCompletion()">

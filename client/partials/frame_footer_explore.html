@@ -1,4 +1,8 @@
 <div class="sequencer">
-  <span class="pure-button pure-button-primary" ng-click="nextFrame()">I'm lost&mdash;break it down!</span>
-  <span class="pure-button" ng-click="skipFrame()">I know this&mdash;move on!</span>
+  <button class="pure-button" ng-class="{'pure-button-primary': getLowestChildCompletionLevel() === 0}"
+          ng-disabled="!hasAvailableChild()"
+          ng-click="goToIncompleteChild()">Too much&mdash;break it down!</button>
+  <button class="pure-button"
+          ng-class="{'pure-button-primary': completed || stateScope.outcome.success}"
+          ng-click="completeAndGoToParent()">I got this&mdash;move on!</button>
 </div>
