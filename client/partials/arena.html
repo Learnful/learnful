@@ -1,7 +1,12 @@
 <div class="arena"
      ng-class="[view, notesToggle ? 'show-notes' : '', transition.stage ? 'transition-' + transition.stage : '']">
   <div class="background"></div>
+  <div class="beta-links">
+    <a href="https://docs.google.com/a/learnful.co/document/d/1eyVw3oVN1RBCNmmHryj8qtQHN64JTvAq7rCzprmNr5A/edit" target="_blank">Release notes</a> &bull;
+    <a href="https://groups.google.com/a/learnful.co/forum/#!forum/pioneers" target="_blank">Discussion group</a>
+  </div>
   <div class="infostrip">
+    <div class="beta">alpha</div>
     <span class="logo">Learnful</span>
     <div lf-frame-finder focus placeholder="What do you want to learn or teach?"></div>
     <span class="goal">

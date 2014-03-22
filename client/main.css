@@ -269,6 +269,14 @@ input {
   background-color: white;
 }
 
+.arena .beta-links {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  font-size: small;
+  text-align: center;
+  z-index: 200;
+}
+
 .arena .infostrip {
   position: fixed;
   top: 0;
@@ -280,6 +288,16 @@ input {
   left: 0;
   box-shadow: 0 2px 10px 3px #aaa3a0;
   z-index: 1;
+}
+
+.arena .infostrip .beta {
+  position: absolute;
+  bottom: 2px;
+  left: 114px;
+  font-size: 70%;
+  color: red;
+  font-variant: small-caps;
+  font-weight: bold;
 }
 
 .arena .infostrip img {
@@ -635,6 +653,10 @@ input {
   color: red;
 }
 
+.chatroom {
+  font-size: small;
+}
+
 .chatroom .chat-presence {
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -650,7 +672,7 @@ input {
 .chatroom .chat-history {
   position: absolute;
   top: 45px;
-  bottom: 61px;
+  bottom: 52px;
   left: 0; right: 0;
   overflow-y: scroll;
 }
@@ -662,7 +684,7 @@ input {
 .chatroom .chat-input {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 56px;
+  height: 47px;
   display: flex;
   flex-direction: row;
 }
@@ -697,17 +719,18 @@ input {
 }
 
 .chatroom .message-tidbit audio {
-  width: 230px;
+  width: 225px;
 }
 
 .chatroom .avatar {
   float: left;
+  margin-right: 5px;
 }
 
 .chatroom .tidbit-avatar {
-  filter: grayscale(.7);
-  -webkit-filter: grayscale(.7);
-  -moz-filter: grayscale(.7);
+  filter: grayscale(1);
+  -webkit-filter: grayscale(1);
+  -moz-filter: grayscale(1);
 }
 
 .chatroom .private {
