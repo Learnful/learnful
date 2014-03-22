@@ -1,5 +1,6 @@
 <div class="arena"
      ng-class="[view, notesToggle ? 'show-notes' : '', transition.stage ? 'transition-' + transition.stage : '']">
+  <div class="background"></div>
   <div class="infostrip">
     <span class="logo">Learnful</span>
     <div lf-frame-finder focus placeholder="What do you want to learn or teach?"></div>
@@ -15,7 +16,7 @@
     </span>
     <div class="current-user" lf-avatar="user.currentUserKey" format="long"></div>
     <div class="notes-button" ng-click="notesToggle = !notesToggle">
-      <span class="notes-icon fa fa-file-text-o"></span> Notes
+      <img src="/images/notes.png"/> Notes
     </div>
   </div>
   <div class="notes">

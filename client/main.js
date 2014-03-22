@@ -235,7 +235,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       var SIZE_X = 600, STEP_X = SIZE_X * 1.33, HALF_X = SIZE_X / 2;
       var SIZE_Y = 400, STEP_Y = SIZE_Y * 1.33, HALF_Y = SIZE_Y / 2;
-      var MARGIN_X = 50, MARGIN_Y = 50;
+      var MARGIN_X = 30, MARGIN_Y = 30;
       var CURVE_MARGIN_X = (STEP_X - SIZE_X) / 1.2, CURVE_MARGIN_Y = (STEP_Y - SIZE_Y) / 1.2;
       var viewport = element.find('.viewport');
       var loading = element.find('.loading');
@@ -261,8 +261,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       function computeViewportStyle() {
         var wx = viewport.innerWidth(), wy = viewport.innerHeight();
         if ($scope.view === 'overview') {
-          var scaleX = Math.min(0.65, wx / ($scope.bounds.spanX * STEP_X + SIZE_X + MARGIN_X * 2));
-          var scaleY = Math.min(0.65, wy / ($scope.bounds.spanY * STEP_Y + SIZE_Y + MARGIN_Y * 2));
+          var scaleX = Math.min(
+            0.65, (wx - MARGIN_X * 2) / ($scope.bounds.spanX * STEP_X + SIZE_X));
+          var scaleY = Math.min(
+            0.65, (wy - MARGIN_Y * 2) / ($scope.bounds.spanY * STEP_Y + SIZE_Y));
           var center = $scope.transition ?
             $scope.transition.pos : {x: $scope.bounds.centerX, y: $scope.bounds.centerY};
           var transformOrigin = $interpolate('{{cx}}px {{cy}}px')({
@@ -315,8 +317,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       }
 
       function drawLink(sourceFrameLayout, destFrameLayout, color, opacity, lineWidth, dash) {
-        color = color || '0,180,0';
-        opacity = opacity || '.05';
+        color = color || '208,222,156';
+        opacity = opacity || '.35';
         lineWidth = lineWidth || 50;
         ctx.save();
         ctx.lineWidth = lineWidth;
@@ -343,8 +345,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         canvas.style.top = offsetY + 'px';
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.translate(-offsetX, -offsetY);
-        ctx.lineWidth = 50;
-        ctx.strokeStyle = 'rgba(0,180,0,0.05)';
+
         _.each($scope.arena.layout, function(frameLayout, frameKey) {
           if (!frameLayout) return;
           var node = $scope.graph[frameKey];
@@ -365,16 +366,16 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
             var opacity;
             if (!_.contains(draftChildKeys, childKey)) {
               lineWidth = 25;
-              color = '180,0,0';
+              color = '186,156,138';
             } else if (!(node && node.childKeys && node.childKeys[childKey])) {
               lineWidth = 25;
-              color = '0,0,180';
+              color = '168,192,186';
             }
             if ($scope.transition && (
               frameKey === $scope.transition.from && childKey === $scope.transition.to ||
               frameKey === $scope.transition.to && childKey === $scope.transition.from
             )) {
-              opacity = 0.5;
+              opacity = 0.9;
             }
             drawLink(frameLayout, childLayout, color, opacity, lineWidth);
           });
@@ -477,13 +478,18 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         }
       }, true);
 
-      $scope.getLowestChildCompletionLevel = function() {
-        return _.min(_.values($scope.completion.getAllCompletionLevels()));
+      $scope.isGoToIncompleteChildPrimary = function() {
+        return !$scope.isCompleteAndGoToParentPrimary() && $scope.hasAvailableChild() &&
+          _.min(_.values($scope.completion.getAllCompletionLevels())) === 0;
+      };
+
+      $scope.isCompleteAndGoToParentPrimary = function() {
+        return $scope.completed || frameStateScope.outcome.success;
       };
 
       $scope.hasAvailableChild = function() {
         return !_.every(_.pluck($scope.frame && $scope.frame.children, 'archived'));
-      }
+      };
 
       $scope.goToIncompleteChild = function() {
         guidance.nextDeeperFrame($scope.frameKey, $scope.stateUserKey).then(function(nextFrameKey) {
@@ -1421,7 +1427,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         ctx.save();
         ctx.beginPath();
         ctx.arc(20, 20, 20, 0, 2 * Math.PI, false);
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = '#fbf5e7';
         ctx.fill();
         ctx.clip();
         ctx.drawImage(sourceImage.get(0), 0, 0, 40, 40);
