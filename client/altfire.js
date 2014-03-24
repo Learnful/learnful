@@ -317,7 +317,7 @@ angular.module('altfire', [])
     }
 
     function onLocalChange(path, newValue) {
-      if (!self.isReady && !angular.isObject(newValue)) {
+      if (!self.isReady && !angular.isObject(newValue) || angular.isUndefined(newValue)) {
         // will get merged in when remote value first comes in
         return;
       }

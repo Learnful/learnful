@@ -70,6 +70,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           $scope.arena.layout[config.prod ? 'f-JIaleLgoVqzl4oJJdUe' : 'f1'] = {x: 0, y: 0};
         }
         if (!$scope.arenaStates) $scope.arenaStates = {frames: {}};
+        if ($scope.arenaStates.focusedFrameKey &&
+            !$scope.arena.layout[$scope.arenaStates.focusedFrameKey]) {
+          $scope.arenaStates.focusedFrameKey = null;
+        }
         $scope.view = $scope.arenaStates.focusedFrameKey ? 'detail' : 'overview';
         _.each($scope.arena.layout, function(layout, frameKey) {
           if (!$scope.arenaStates.frames[frameKey]) $scope.arenaStates.frames[frameKey] = {};
@@ -81,7 +85,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       $scope.$on('focused', function(event, frameKey) {$scope.focus(frameKey);});
       $scope.focus = function(frameKey) {
-        if (frameKey && $scope.arenaStates.focusedFrameKey && $scope.arena.layout[frameKey]) {
+        if (frameKey && $scope.view !== 'neighborhood' && $scope.arenaStates.focusedFrameKey &&
+            $scope.arena.layout[frameKey]) {
           // Up-and-over animation to transition between two focused frames
           var fromLayout = $scope.arena.layout[$scope.arenaStates.focusedFrameKey];
           var toLayout = $scope.arena.layout[frameKey];
@@ -117,20 +122,27 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         if ($scope.arenaStates.focusedFrameKey === frameKey) focus();
       };
 
+      $scope.addFrame = function(frameKey, mode, focus) {
+        if (!$scope.arena.layout[frameKey] && $scope.bounds) {
+          var oldView = $scope.view;
+          $scope.view = 'overview';
+          $scope.updateLayoutBounds();
+          var constraints = gatherConstraints(frameKey);
+          $scope.arena.layout[frameKey] = findBestLocation(constraints);
+          $scope.arenaStates.frames[frameKey] = {};
+          mode = mode || 'explore';
+          $scope.view = oldView;
+          $scope.updateLayoutBounds();
+        }
+        if (mode) $scope.arenaStates.frames[frameKey].mode = mode;
+        if (focus) $scope.focus(frameKey);
+      };
+
       $scope.$on('frameAdded', function(event, frameKey, mode, focus) {
         event.stopPropagation();
         // Let any data changes caused by the addition propagate, so we compute the right layout
         // constraints.
-        $timeout(function() {
-          if (!$scope.arena.layout[frameKey] && $scope.bounds) {
-            var constraints = gatherConstraints(frameKey);
-            $scope.arena.layout[frameKey] = findBestLocation(constraints);
-            $scope.arenaStates.frames[frameKey] = {};
-            mode = mode || 'explore';
-          }
-          if (mode) $scope.arenaStates.frames[frameKey].mode = mode;
-          if (focus) $scope.focus(frameKey);
-        });
+        $timeout(function() {$scope.addFrame(frameKey, mode, focus);});
       });
 
       $scope.$on('completeTransition', function(event, data) {
@@ -140,6 +152,40 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           $scope.$broadcast('completeTransition', data);
         }
       });
+
+      EXTRA_CONSTRAINTS = {
+        larger: function(pos) {return (pos.y < 0 && Math.abs(pos.x) < Math.abs(pos.y)) ? 0 : 100;},
+        smaller: function(pos) {return (pos.y > 0 && Math.abs(pos.x) < pos.y) ? 0 : 100;},
+        similar: function(pos) {return (pos.x > 0 && pos.x > Math.abs(pos.y)) ? 0 : 100;},
+        different: function(pos) {
+          return (pos.x < 0 && Math.abs(pos.x) > Math.abs(pos.y)) ? 0 : 100;}
+      };
+
+      $scope.$on('showNeighbors', function(event, frameKey) {
+        $scope.arenaStates.focusedFrameKey = frameKey;
+        $scope.view = 'neighborhood';
+        $scope.neighborLayout = {};
+        $scope.neighborLayout[frameKey] = {x: 0, y: 0};
+        _.each($scope.graph[frameKey].parentKeys, function(unused, parentKey) {
+          $scope.updateLayoutBounds();
+          var constraints = gatherConstraints(parentKey);
+          constraints.push(EXTRA_CONSTRAINTS.larger);
+          $scope.neighborLayout[parentKey] = findBestLocation(constraints);
+          $scope.arenaStates.frames[parentKey] = {mode: 'explore'};
+        });
+        _.each($scope.graph[frameKey].childKeys, function(unused, childKey) {
+          $scope.updateLayoutBounds();
+          var constraints = gatherConstraints(childKey);
+          constraints.push(EXTRA_CONSTRAINTS.smaller);
+          $scope.neighborLayout[childKey] = findBestLocation(constraints);
+          $scope.arenaStates.frames[childKey] = {mode: 'explore'};
+        });
+      });
+
+      $scope.getLayout = function() {
+        return $scope.view === 'neighborhood' ?
+          $scope.neighborLayout : $scope.arena && $scope.arena.layout;
+      };
 
       function distance(pos1, pos2) {
         if (_.isObject(pos1) && _.isObject(pos2)) {
@@ -154,7 +200,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         constraints.push(function(pos) {
           return distance(pos, {x: 0, y: 0}) * 0.2;
         });
-        _.each($scope.arena.layout, function(layout, frameKey) {
+        _.each($scope.getLayout(), function(layout, frameKey) {
           var edges = $scope.graph[frameKey];
           var isDescendant = edges && edges.descendantKeys && edges.descendantKeys[newFrameKey];
           var isAncestor = edges && edges.ancestorKeys && edges.ancestorKeys[newFrameKey];
@@ -204,7 +250,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       function findBestLocation(constraints) {
         var occupied = {};
-        _.each($scope.arena.layout, function(layout) {
+        _.each($scope.getLayout(), function(layout) {
           occupied[layout.x + ',' + layout.y] = true;
         });
         var wholeMinX = Math.floor($scope.bounds.minX) === $scope.bounds.minX;
@@ -242,9 +288,9 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       var canvas = element.find('.frame-connections').get(0);
       var ctx = canvas.getContext('2d');
 
-      function computeLayoutBounds()  {
+      $scope.updateLayoutBounds = function() {
         var b = {minX: 0, maxX: 0, minY: 0, maxY: 0};
-        _.each($scope.arena.layout, function(a) {
+        _.each($scope.getLayout(), function(a) {
           if (!a) return;
           b = {
             minX: Math.min(b.minX, a.x), maxX: Math.max(b.maxX, a.x),
@@ -255,12 +301,12 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         b.spanY = b.maxY - b.minY;
         b.centerX = b.spanX / 2 + b.minX;
         b.centerY = b.spanY / 2 + b.minY;
-        return b;
-      }
+        $scope.bounds = b;
+      };
 
       function computeViewportStyle() {
         var wx = viewport.innerWidth(), wy = viewport.innerHeight();
-        if ($scope.view === 'overview') {
+        if ($scope.view === 'overview' || $scope.view === 'neighborhood') {
           var scaleX = Math.min(
             0.65, (wx - MARGIN_X * 2) / ($scope.bounds.spanX * STEP_X + SIZE_X));
           var scaleY = Math.min(
@@ -295,7 +341,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         if (!layout) return;
         var wx = viewport.innerWidth(), wy = viewport.innerHeight();
         var cx = layout.x * STEP_X, cy = layout.y * STEP_Y;
-        if (frameKey === $scope.arenaStates.focusedFrameKey) {
+        if ($scope.view === 'detail' && frameKey === $scope.arenaStates.focusedFrameKey) {
           var width = Math.min(1000, wx - MARGIN_X * 2);
           var height = wy - MARGIN_Y * 2;
           var transform = $interpolate('translate({{tx}}px,{{ty}}px)')({
@@ -314,6 +360,58 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
             width: SIZE_X, height: SIZE_Y
           };
         }
+      }
+
+      function drawNeighborhoodDividers(offsetX, offsetY) {
+        var focusLayout = $scope.getLayout()[$scope.arenaStates.focusedFrameKey];
+        ctx.save();
+        ctx.fillStyle = ctx.strokeStyle = '#4b392f';
+        ctx.translate(focusLayout.x * STEP_X, focusLayout.y * STEP_Y);
+
+        function drawRadial(x, y) {
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+        }
+
+        ctx.save();
+        ctx.lineWidth = 5;
+        var slope = STEP_Y / STEP_X;
+        drawRadial(offsetX, slope * offsetX);
+        drawRadial(offsetX, -slope * offsetX);
+        drawRadial(canvas.width + offsetX, slope * (canvas.width + offsetX));
+        drawRadial(canvas.width + offsetX, -slope * (canvas.width + offsetX));
+        ctx.restore();
+
+        ctx.save();
+        ctx.beginPath();
+        // ctx.translate((focusLayout.x - 0.5) * STEP_X, (focusLayout.y - 0.5) * STEP_Y);
+        ctx.scale(STEP_X / 2, STEP_Y / 2);
+        ctx.arc(0, 0, 1, 0, 2 * Math.PI, false);
+        ctx.restore();
+        ctx.save();
+        ctx.lineWidth = 10;
+        ctx.stroke();
+        ctx.clip();
+        ctx.clearRect(-0.5 * STEP_X, -0.5 * STEP_Y, STEP_X, STEP_Y);
+        ctx.restore();
+
+        ctx.save();
+        ctx.font = '30px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('LARGER', 0, -STEP_Y / 2 - 10);
+        ctx.textBaseline = 'top';
+        ctx.fillText('SMALLER', 0, STEP_Y / 2 + 10);
+        ctx.rotate(Math.PI / 2);
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('SIMILAR', 0, -STEP_X / 2 - 10);
+        ctx.rotate(-Math.PI);
+        ctx.fillText('DIFFERENT', 0, -STEP_X / 2 - 10);
+        ctx.restore();
+
+        ctx.restore();
       }
 
       function drawLink(sourceFrameLayout, destFrameLayout, color, opacity, lineWidth, dash) {
@@ -337,16 +435,19 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       function drawConnections() {
         if (!($scope.arena && $scope.arenaStates)) return;
-        var offsetX = $scope.bounds.minX * STEP_X - HALF_X - MARGIN_X;
-        var offsetY = $scope.bounds.minY * STEP_Y - HALF_Y - MARGIN_Y;
-        canvas.width = $scope.bounds.spanX * STEP_X + SIZE_X + 2 * MARGIN_X;
-        canvas.height = $scope.bounds.spanY * STEP_Y + SIZE_Y + 2 * MARGIN_Y;
+        var offsetX = $scope.bounds.minX * STEP_X - SIZE_X - MARGIN_X;
+        var offsetY = $scope.bounds.minY * STEP_Y - SIZE_Y - MARGIN_Y;
+        canvas.width = $scope.bounds.spanX * STEP_X + 2 * SIZE_X + 2 * MARGIN_X;
+        canvas.height = $scope.bounds.spanY * STEP_Y + 2 * SIZE_Y + 2 * MARGIN_Y;
         canvas.style.left = offsetX + 'px';
         canvas.style.top = offsetY + 'px';
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.translate(-offsetX, -offsetY);
 
-        _.each($scope.arena.layout, function(frameLayout, frameKey) {
+        if ($scope.view === 'neighborhood') drawNeighborhoodDividers(offsetX, offsetY);
+
+        var layout = $scope.getLayout();
+        _.each(layout, function(frameLayout, frameKey) {
           if (!frameLayout) return;
           var node = $scope.graph[frameKey];
           var childKeys = _.keys(node && node.childKeys), draftChildKeys = childKeys;
@@ -359,7 +460,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
             childKeys = _.union(childKeys, draftChildKeys);
           }
           _.each(childKeys, function(childKey) {
-            var childLayout = $scope.arena.layout[childKey];
+            var childLayout = layout[childKey];
             if (!childLayout) return;
             var lineWidth;
             var color;
@@ -380,7 +481,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
             drawLink(frameLayout, childLayout, color, opacity, lineWidth);
           });
           _.each(node && node.descendantKeys, function(unused, descendantKey) {
-            var descendantLayout = $scope.arena.layout[descendantKey];
+            var descendantLayout = layout[descendantKey];
             if (!descendantLayout || descendantKey === frameKey ||
                 node && node.childKeys && node.childKeys[descendantKey] ||
                 _.some(node && node.childKeys, function(unused, childKey) {
@@ -399,7 +500,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         if (!$scope.arena || !$scope.bounds || !$scope.arenaStates) return;
         $scope.viewportStyle = computeViewportStyle();
         $scope.frameWrapperStyles = {};
-        _.each($scope.arena.layout, function(layout, frameKey) {
+        _.each($scope.getLayout(), function(layout, frameKey) {
           $scope.frameWrapperStyles[frameKey] = computeFrameWrapperStyle(frameKey, layout);
         });
       }
@@ -408,7 +509,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       function updateLayout() {
         if (!$scope.arena) return;
-        $scope.bounds = computeLayoutBounds();
+        $scope.updateLayoutBounds();
         updateView();
         drawConnections();
         if (firstLayout) {
@@ -420,8 +521,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         }
       }
 
-      $scope.$watch('arena.layout', updateLayout, true);
-      $scope.$watch('[view, arenaStates.focusedFrameKey, notesToggle]', updateView, true);
+      // Technically only need to update layout when view changes to/from neighborhood, otherwise
+      // just update view.
+      $scope.$watch('[view, arena.layout]', updateLayout, true);
+      $scope.$watch('[arenaStates.focusedFrameKey, notesToggle]', updateView, true);
       $scope.$watch('[graph, draftChildren, arenaStates.frames]', drawConnections, true);
       $scope.$watch('transition', drawConnections);
       $(window).on('resize', _.throttle(function() {$timeout(updateView);}, 400));
@@ -451,16 +554,6 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         completed: {bind: 'users/{{stateUserKey}}/completions/{{frameKey}}'},
         votes: {pull: 'votes/frames/{{frameKey}}'}
       });
-
-      function moveContentToCore(frame) {
-        if (frame.content && !frame.core.content) {
-          frame.core.content = frame.content;
-          frame.content = null;
-        }
-      }
-
-      handles.frame.ready().then(function() {moveContentToCore($scope.frame);});
-      handles.draft.ready().then(function() {moveContentToCore($scope.draft);});
 
       $scope.$on('trigger', function(event, args) {
         $scope.trigger(args.tidbitKey, args.preferAlternative);
@@ -508,6 +601,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
               'frames in this workspace.');
           }
         });
+      };
+
+      $scope.goElsewhere = function() {
+        $scope.$emit('showNeighbors', $scope.frameKey);
       };
 
       $scope.trigger = function(tidbitKey, preferAlternative) {
