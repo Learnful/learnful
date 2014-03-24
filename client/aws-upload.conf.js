@@ -4,12 +4,10 @@ module.exports = {
   cacheControl: "max-age=300",
   patterns: [
     "index.html",
-    "*.png",
-    "*.ico",
-    "browserconfig.xml",
     "partials/**",
     "libs/**",
     "images/**",
+    "favicons/**",
     "bower_components/jquery-mousewheel/jquery.mousewheel.js",
     "bower_components/jshint/dist/jshint.js",
     "bower_components/Recorderjs/recorder.js",
