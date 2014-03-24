@@ -1,6 +1,7 @@
 var Firebase = require('firebase');
 var _ = require('underscore');
-var db = new Firebase('https://rebase.firebaseio.com/');
+var argv = require('yargs').argv;
+var db = new Firebase(argv.prod ? 'https://learnful.firebaseio.com' : 'https://rebase.firebaseio.com/');
 var lastGraphChildKeys = {};
 var updating = false;
 
