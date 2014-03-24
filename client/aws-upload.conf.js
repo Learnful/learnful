@@ -4,6 +4,9 @@ module.exports = {
   cacheControl: "max-age=300",
   patterns: [
     "index.html",
+    "*.png",
+    "*.ico",
+    "browserconfig.xml",
     "partials/**",
     "libs/**",
     "images/**",

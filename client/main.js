@@ -503,7 +503,9 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           if (nextFrameKey) {
             $scope.transition(nextFrameKey);
           } else {
-            alert('No parent found -- we would now pick a frame at random that relates to the other frames in this workspace.');
+            alert(
+              'No parent found -- we would now pick a frame at random that relates to the other ' +
+              'frames in this workspace.');
           }
         });
       };
@@ -1855,8 +1857,11 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           });
         });
         $scope.$watch('question', function(value) {
-          element.text(value);
+          element.text(value || '...');
+          element.prepend('<span class="fa fa-lightbulb-o"></span>&nbsp;');
         });
+      } else {
+        element.prepend('<span class="fa fa-lightbulb-o"></span>&nbsp;');
       }
       element.on('click', function(event) {
         event.preventDefault();
@@ -1883,8 +1888,11 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           });
         });
         $scope.$watch('title', function(value) {
-          element.text(value);
+          element.text(value || '...');
+          element.prepend('<span class="fa fa-compass"></span>&nbsp;');
         });
+      } else {
+        element.prepend('<span class="fa fa-compass"></span>&nbsp;');
       }
       element.on('click', function(event) {
         event.preventDefault();

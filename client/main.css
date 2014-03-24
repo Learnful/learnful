@@ -6,6 +6,10 @@ a {
   text-decoration: none;
 }
 
+a:hover {
+  text-decoration: underline;
+}
+
 pre {
   margin: 0;
 }
@@ -44,8 +48,9 @@ summary {
 
 .icon-button {
   cursor: pointer;
-  opacity: 0.4;
+  opacity: 0.7;
   width: 1em;
+  color: #666;
 }
 
 .icon-button[disabled], .icon-button[disabled]:hover, .icon-button[disabled]:active {
@@ -57,19 +62,23 @@ summary {
 }
 
 .icon-button.on {
-  color: red;
+  color: #ff9c81;
 }
 
 .icon-button:hover {
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 .icon-button:active {
   opacity: 1.0;
 }
 
+.pure-button-primary {
+  background-color: #78a944;
+}
+
 .pure-button.on {
-  background-color: #ff9a9a;
+  background-color: #ff9c81;
 }
 
 input, textarea, .CodeMirror {
@@ -260,13 +269,14 @@ input {
 .arena .background {
   position: fixed;
   top: 0; bottom: 0; left: 0; right: 0;
-  background-color: #f2f3ea;
-  transition-property: background-color;
-  opacity: 0.5;
+  transition-property: opacity;
+  opacity: .12;
+  background-image: url(/images/background.jpg);
+  background-repeat: repeat;
 }
 
 .arena.detail .background {
-  background-color: white;
+  opacity: 0;
 }
 
 .arena .beta-links {
@@ -288,6 +298,7 @@ input {
   left: 0;
   box-shadow: 0 2px 10px 3px #aaa3a0;
   z-index: 1;
+  background-repeat: no-repeat;
 }
 
 .arena .infostrip .beta {
@@ -295,7 +306,7 @@ input {
   bottom: 2px;
   left: 114px;
   font-size: 70%;
-  color: red;
+  color: #d00;
   font-variant: small-caps;
   font-weight: bold;
 }
@@ -349,7 +360,7 @@ input {
   height: 50px;
   margin-left: 10px;
   padding: 10px 20px;
-  padding-top: 13px;
+  padding-top: 7px;
 }
 
 .arena.show-notes .infostrip .notes-button {
@@ -523,19 +534,18 @@ input {
 .frame .sequencer {
   text-align: center;
   transition-property: opacity;
+}
+
+.overview .frame .sequencer {
   opacity: 0;
 }
 
-.frame.focused .sequencer {
-  opacity: 1;
-}
-
-.frame .sequencer .button {
-  margin: 0 20px;
+.frame .sequencer button {
+  margin: 0 10px;
 }
 
 .completion {
-  color: green;
+  color: #539f00;
   width: 1em;
   display: inline-block;
   position: relative;
@@ -743,13 +753,8 @@ input {
   clear: left;
 }
 
-.tidbit-link, .frame-link {
-  border-bottom: 1px blue dotted;
-}
-
 a.tidbit-link, a.tidbit-link:visited, a.frame-link, a.frame-link:visited {
-  color: inherit;
-  text-decoration: none;
+  color: #5e9423;
 }
 
 .checkmark-true {
