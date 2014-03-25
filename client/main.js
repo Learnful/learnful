@@ -1240,7 +1240,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
             if (tidbitKey in sustainedTriggers) {
               if (!triggerResult) {
                 delete sustainedTriggers[tidbitKey];
-              } else if (_.now() - sustainedTriggers[tidbitKey] >= tidbit.sustain) {
+              } else if (_.now() - sustainedTriggers[tidbitKey] >= tidbit.sustain * 1000) {
                 shouldPlay = true;
               }
             } else if (triggerResult) {
