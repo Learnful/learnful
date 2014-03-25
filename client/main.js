@@ -1947,6 +1947,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
 .directive('lfTidbitLink', function($timeout, fire) {
   return {
+    scope: true,
     link: function($scope, element, attrs, controller) {
       element.filter('a').attr('href', '');
       element.addClass('tidbit-link');
@@ -1977,6 +1978,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
 .directive('lfFrameLink', function($timeout, fire) {
   return {
+    scope: true,
     link: function($scope, element, attrs, controller) {
       element.filter('a').attr('href', '');
       element.addClass('frame-link');
@@ -2000,7 +2002,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       element.on('click', function(event) {
         event.preventDefault();
         $scope.$emit('transition', {
-          originFrameKey: $scope.frameKey, targetFrameKey: attrs.lfFrameLink});
+          originFrameKey: $scope.$parent.frameKey, targetFrameKey: attrs.lfFrameLink});
       });
     }
   };
