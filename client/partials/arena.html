@@ -42,7 +42,7 @@
              mode="arenaStates.frames[frameKey].mode"
              state-user-key="arena.ownerKey || user.currentUserKey"
              focused="arenaStates.focusedFrameKey === frameKey"></div>
-        <div class="frame-cover" ng-click="addFrame(frameKey, undefined, true)"></div>
+        <div class="frame-cover" ng-click="selectFrame(frameKey)"></div>
         <div class="frame-hide-button icon-button fa fa-times-circle" ng-click="hideFrame(frameKey)"
              title="Remove this frame from the workspace (does not delete it)."></div>
       </div>
