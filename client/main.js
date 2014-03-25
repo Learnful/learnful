@@ -342,7 +342,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         var wx = viewport.innerWidth(), wy = viewport.innerHeight();
         var cx = layout.x * STEP_X, cy = layout.y * STEP_Y;
         if ($scope.view === 'detail' && frameKey === $scope.arenaStates.focusedFrameKey) {
-          var width = Math.min(1000, wx - MARGIN_X * 2);
+          var width = Math.min(1200, wx - MARGIN_X * 2);
           var height = wy - MARGIN_Y * 2;
           var transform = $interpolate('translate({{tx}}px,{{ty}}px)')({
             tx: cx - width / 2, ty: cy - height / 2
@@ -620,7 +620,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       });
 
       function hasTransitionTidbit(frame, frameKey) {
-        var hasActiveChild = _.some(frame.children, function(child) {
+        var hasActiveChild = _.some(frame && frame.children, function(child) {
           return !child.archived && child.frameKey === frameKey;
         });
         return hasActiveChild && frame.tidbits[frameKey] && !frame.tidbits[frameKey].archived;
@@ -1164,7 +1164,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
   };
 })
 
-.directive('lfFrameContent', function($compile, $timeout, fire, director) {
+.directive('lfFrameContent', function($compile, $timeout, fire, director, analyzerUtils) {
   // Inherits scope from lf-frame.  Requires attribute value of 'frame' or 'draft'.
   return {
     scope: true,
@@ -1184,7 +1184,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         contentScope = $scope.stateScope.$new();
         $compile(element.contents())(contentScope);
         contentScope.$watch('input', runAnalyzer, true);
-      };
+      }
 
       $scope.$watch(attrs.lfFrameContent + '.core.content', bindContent);
 
@@ -1201,7 +1201,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           $scope.stateScope._analyzing = !$scope.stateScope._analyzing;
           flipTimeoutPromise = $timeout(clearAnalyzeIndicatorBit, 200);
           // evalAnalyzer is defined at the top level, to keep its lexical scope simple.
-          evalAnalyzer($scope[attrs.lfFrameContent].analyzerCode, contentScope);
+          evalAnalyzer($scope[attrs.lfFrameContent].analyzerCode, contentScope, analyzerUtils);
           evalTriggers();
         }
       });}, 100);
@@ -1293,6 +1293,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         });
       } else if (!attrs.mode) {
         options.lineWrapping = true;
+        element.addClass('proportional-font');
       }
       var codeMirror = CodeMirror(element.get()[0], options);
 
@@ -2008,13 +2009,78 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
   };
 })
 
+.service('analyzerUtils', function() {
+  var self = {};
+
+  /**
+   * Matches strings against a list of specs, trying to make sure each spec is fulfilled precisely
+   * once.
+   * @param  {Array<string> || Object} data The subject data to try to match, either as an array
+   * of of strings, or an object that gives each string a key.
+   *
+   * @param  {Object<string, Array<string || RegExp>>} specs The specifications to try to match.
+   * Each one is identified by a unique key and consists of list of patterns that must all match
+   * for the condition to hold. Each pattern is either a regular expression (which will be used
+   * verbatim), or a string that will be converted into a regular expression with word-boundary
+   * matching and case-insentivity added.
+   *
+   * @param  {Object<string, ?>} options Extra options for the matcher, with their default values:
+   * {stripWhitespace: false} eliminate all whitespace characters from data prior to matching.
+   * {ignoreCase: true} ignore case when creating regexes from strings.
+   *
+   * @return {Array<string> || Object<string, string>} The results, keyed using the same keys as
+   * the data argument (either array indices or object keys), with the values being the key of the
+   * spec that matches the given input. If a data key doesn't appear in this result then it wasn't
+   * matched.  The object also has some extra attributes:
+   * {boolean} $satisfied True if all the specs were satisfied by the data.
+   * {boolean} $exhausted True if $satisfied and there are no extra unmatched data strings (modulo
+   * empty ones).
+   * {Object<string,boolean>} $matched The spec keys that were successfully matched.
+   */
+  self.match = function(data, specs, options) {
+    options = _.extend({stripWhitespace: false, ignoreCase: true}, options);
+    var pairs = _.chain(data).pairs().sortBy(function(pair) {return pair[0];}).value();
+    if (options.stripWhitespace) {
+      pairs = _.map(pairs, function(pair) {
+        return [pair[0], pair[1].replace(/\s+/g, '')];
+      });
+    }
+    pairs = _.filter(pairs, function(pair) {return pair[1];});
+    var results = {};
+    var matched = {};
+    _.each(pairs, function(pair) {
+      var dataKey = pair[0], value = pair[1];
+      _.each(specs, function(spec, specKey) {
+        if (_.has(matched, specKey)) return;
+        if (_.every(spec, function(pattern) {
+          if (_.isString(pattern)) {
+            pattern = new RegExp('\\b' + pattern + '\\b', options.ignoreCase ? 'i' : '');
+          }
+          pattern.lastIndex = 0;
+          return pattern.test(value);
+        })) {
+          results[dataKey] = specKey;
+          matched[specKey] = true;
+        }
+      });
+    });
+    if (_.isArray(data)) results = _.map(data, function(unused, index) {return results[index];});
+    results.$matched = matched;
+    results.$satisfied = _.size(matched) === _.size(specs);
+    results.$exhausted = results.$satisfied && _.size(matched) === _.size(pairs);
+    return results;
+  };
+  return self;
+})
+
 ;
 
-function evalAnalyzer(code, scope) {
+function evalAnalyzer(code, scope, analyzerUtils) {
   var mask = {scope: scope};
   for (p in this) {
-    if (p !== '_') mask[p] = undefined;
+    if (p !== '_' && p !== 'console') mask[p] = undefined;
   }
+  mask.lf = analyzerUtils;
   (new Function(
     'with(this) {' +
     'var input=scope.input, outcome=scope.outcome, triggered=scope.triggered, ' +
