@@ -64,7 +64,12 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       });
 
       $q.all(handles.arena.ready(), handles.arenaStates.ready()).then(function() {
-        if (!$scope.arena) $scope.arena = {};
+        if (!$scope.arena) {
+            $scope.arena = {core: {
+            ownerKey: user.currentUserKey,
+            rootFrameKey: config.prod ? 'f-JIaleLgoVqzl4oJJdUe' : 'f1'
+          }};
+        }
         if (!$scope.arena.layout) {
           $scope.arena.layout = {};
           $scope.arena.layout[config.prod ? 'f-JIaleLgoVqzl4oJJdUe' : 'f1'] = {x: 0, y: 0};
