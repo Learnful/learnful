@@ -10,13 +10,13 @@
     <span class="logo">Learnful</span>
     <div lf-frame-finder focus placeholder="What do you want to learn or teach?"></div>
     <span class="goal">
-      <span ng-if="arena.rootFrameKey">
+      <span ng-if="arena.core.rootFrameKey">
         Goal:
-        <span lf-completion="arena.rootFrameKey" state-user-key="arena.ownerKey || user.currentUserKey" control="readonly"></span>
+        <span lf-completion="arena.core.rootFrameKey" state-user-key="arena.core.ownerKey || user.currentUserKey" control="readonly"></span>
         <span class="title">{{rootFrameCore.title}}</span>
       </span>
-      <span ng-if="arena.ownerKey &amp;&amp; user.currentUserKey !== arena.ownerKey">
-        (for <span lf-avatar="arena.ownerKey" format="long"></span>)
+      <span ng-if="arena.ownerKey &amp;&amp; user.currentUserKey !== arena.core.ownerKey">
+        (for <span lf-avatar="arena.core.ownerKey" format="long"></span>)
       </span>
     </span>
     <div class="current-user" lf-avatar="user.currentUserKey" format="long"></div>
@@ -28,20 +28,20 @@
     <div class="notes-text proportional-font" lf-code-editor ng-model="arena.notes"
          placeholder="A place for notes related to this workspace."></div>
     <div class="viewport-button edit-frame icon-button fa fa-pencil"
-     ng-class="{on: arenaStates.frames[arenaStates.focusedFrameKey].mode &amp;&amp; arenaStates.frames[arenaStates.focusedFrameKey].mode !== 'explore'}"
+     ng-class="{on: arenaStates.frames[focusedFrameKey].mode &amp;&amp; arenaStates.frames[focusedFrameKey].mode !== 'explore'}"
      ng-click="toggleEdit()" title="Toggle edit mode"></div>
   </div>
   <div class="loading">Loading...</div>
   <div class="viewport" ng-style="viewportStyle" style="opacity: 0">
     <canvas class="frame-connections"></canvas>
     <div ng-repeat="(frameKey, layout) in getLayout()" class="frame-wrapper"
-         ng-class="{focused: arenaStates.focusedFrameKey === frameKey, editing: arenaStates.frames[frameKey].mode &amp;&amp; arenaStates.frames[frameKey].mode !== 'explore'}"
+         ng-class="{focused: focusedFrameKey === frameKey, editing: arenaStates.frames[frameKey].mode &amp;&amp; arenaStates.frames[frameKey].mode !== 'explore'}"
          ng-style="frameWrapperStyles[frameKey]">
       <div class="frame-scaler">
         <div lf-frame="frameKey"
              mode="arenaStates.frames[frameKey].mode"
              state-user-key="arena.ownerKey || user.currentUserKey"
-             focused="arenaStates.focusedFrameKey === frameKey"></div>
+             focused="focusedFrameKey === frameKey"></div>
         <div class="frame-cover" ng-click="selectFrame(frameKey)"></div>
         <div class="frame-hide-button icon-button fa fa-times-circle" ng-click="hideFrame(frameKey)"
              title="Remove this frame from the workspace (does not delete it)."></div>

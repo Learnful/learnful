@@ -74,7 +74,8 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
             !$scope.arena.layout[$scope.arenaStates.focusedFrameKey]) {
           $scope.arenaStates.focusedFrameKey = null;
         }
-        $scope.view = $scope.arenaStates.focusedFrameKey ? 'detail' : 'overview';
+        $scope.focusedFrameKey = $scope.arenaStates.focusedFrameKey;
+        $scope.view = $scope.focusedFrameKey ? 'detail' : 'overview';
         _.each($scope.arena.layout, function(layout, frameKey) {
           if (!$scope.arenaStates.frames[frameKey]) $scope.arenaStates.frames[frameKey] = {};
           if (!$scope.arenaStates.frames[frameKey].mode) {
@@ -85,19 +86,19 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
       $scope.$on('focused', function(event, frameKey) {$scope.focus(frameKey);});
       $scope.focus = function(frameKey) {
-        if (frameKey && $scope.view !== 'neighborhood' && $scope.arenaStates.focusedFrameKey &&
+        if (frameKey && $scope.view !== 'neighborhood' && $scope.focusedFrameKey &&
             $scope.arena.layout[frameKey]) {
           // Up-and-over animation to transition between two focused frames
-          var fromLayout = $scope.arena.layout[$scope.arenaStates.focusedFrameKey];
+          var fromLayout = $scope.arena.layout[$scope.focusedFrameKey];
           var toLayout = $scope.arena.layout[frameKey];
           $scope.transition = {
-            stage: 'begin', from: $scope.arenaStates.focusedFrameKey, to: frameKey,
+            stage: 'begin', from: $scope.focusedFrameKey, to: frameKey,
             pos: {x: (fromLayout.x + toLayout.x) / 2, y: (fromLayout.y + toLayout.y) / 2}
           };
-          $scope.arenaStates.focusedFrameKey = null;
+          $scope.focusedFrameKey = null;
           $scope.view = 'overview';
           $timeout(function() {
-            $scope.arenaStates.focusedFrameKey = frameKey;
+            $scope.focusedFrameKey = $scope.arenaStates.focusedFrameKey = frameKey;
             $scope.view = 'detail';
             $scope.transition.stage = 'end';
             $timeout(function() {
@@ -105,27 +106,27 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
             }, 500);
           }, 500);
         } else {
-          $scope.arenaStates.focusedFrameKey = frameKey || null;
+          $scope.focusedFrameKey = $scope.arenaStates.focusedFrameKey = frameKey || null;
           $scope.view = frameKey ? 'detail' : 'overview';
         }
       };
 
       $scope.toggleEdit = function() {
-        $scope.arenaStates.frames[$scope.arenaStates.focusedFrameKey].mode =
-          $scope.arenaStates.frames[$scope.arenaStates.focusedFrameKey].mode === 'explore' ?
+        $scope.arenaStates.frames[$scope.focusedFrameKey].mode =
+          $scope.arenaStates.frames[$scope.focusedFrameKey].mode === 'explore' ?
             'edit' : 'explore';
       };
 
       $scope.hideFrame = function(frameKey) {
         $scope.arena.layout[frameKey] = null;
         $scope.arenaStates.frames[frameKey] = null;
-        if ($scope.arenaStates.focusedFrameKey === frameKey) focus();
+        if ($scope.focusedFrameKey === frameKey) focus();
       };
 
       $scope.selectFrame = function(frameKey) {
-        if ($scope.arenaStates.focusedFrameKey) {
+        if ($scope.focusedFrameKey) {
           $scope.$broadcast('transition', {
-            originFrameKey: $scope.arenaStates.focusedFrameKey, targetFrameKey: frameKey});
+            originFrameKey: $scope.focusedFrameKey, targetFrameKey: frameKey});
         } else {
           $scope.focus(frameKey);
         }
@@ -169,7 +170,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       };
 
       $scope.$on('showNeighbors', function(event, frameKey) {
-        $scope.arenaStates.focusedFrameKey = frameKey;
+        $scope.focusedFrameKey = frameKey;
         $scope.view = 'neighborhood';
         $scope.neighborLayout = {};
         $scope.neighborLayout[frameKey] = {x: 0, y: 0};
@@ -333,7 +334,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
             transform: transform, '-webkit-transform': transform,
           };
         } else if ($scope.view === 'detail') {
-          var frameLayout = $scope.arena.layout[$scope.arenaStates.focusedFrameKey];
+          var frameLayout = $scope.arena.layout[$scope.focusedFrameKey];
           var transform = $interpolate('translate({{tx}}px,{{ty}}px) scale(1)')({
             tx: -frameLayout.x * STEP_X + wx / 2,
             ty: -frameLayout.y * STEP_Y + wy / 2
@@ -348,7 +349,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         if (!layout) return;
         var wx = viewport.innerWidth(), wy = viewport.innerHeight();
         var cx = layout.x * STEP_X, cy = layout.y * STEP_Y;
-        if ($scope.view === 'detail' && frameKey === $scope.arenaStates.focusedFrameKey) {
+        if ($scope.view === 'detail' && frameKey === $scope.focusedFrameKey) {
           var width = Math.min(1200, wx - MARGIN_X * 2);
           var height = wy - MARGIN_Y * 2;
           var transform = $interpolate('translate({{tx}}px,{{ty}}px)')({
@@ -370,7 +371,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       }
 
       function drawNeighborhoodDividers(offsetX, offsetY) {
-        var focusLayout = $scope.getLayout()[$scope.arenaStates.focusedFrameKey];
+        var focusLayout = $scope.getLayout()[$scope.focusedFrameKey];
         ctx.save();
         ctx.fillStyle = ctx.strokeStyle = '#4b392f';
         ctx.translate(focusLayout.x * STEP_X, focusLayout.y * STEP_Y);
@@ -531,7 +532,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
       // Technically only need to update layout when view changes to/from neighborhood, otherwise
       // just update view.
       $scope.$watch('[view, arena.layout]', updateLayout, true);
-      $scope.$watch('[arenaStates.focusedFrameKey, notesToggle]', updateView, true);
+      $scope.$watch('[focusedFrameKey, notesToggle]', updateView, true);
       $scope.$watch('[graph, draftChildren, arenaStates.frames]', drawConnections, true);
       $scope.$watch('transition', drawConnections);
       $(window).on('resize', _.throttle(function() {$timeout(updateView);}, 400));
