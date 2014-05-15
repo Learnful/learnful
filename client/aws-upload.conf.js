@@ -11,7 +11,7 @@ module.exports = {
     "*.png",
     "favicon.ico",
     "browserconfig.xml",
-    "bower_components/altfire/altfire.js",
+    "bower_components/altfire/dist/altfire.min.js",
     "bower_components/jquery-mousewheel/jquery.mousewheel.js",
     "bower_components/jshint/dist/jshint.js",
     "bower_components/Recorderjs/recorder*.js",
