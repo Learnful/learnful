@@ -278,7 +278,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           for (var x = minX[parity]; x <= maxX[parity]; x++) {
             if (occupied[x + ',' + y]) continue;
             var pos = {x: x, y: y};
-            var score = _.reduce(constraints, function(sum, fn) {return sum + fn(pos);}, 0);
+            var score = sumConstraints(constraints, pos);
             if (_.isUndefined(bestScore) || score < bestScore) {
               bestPos = pos;
               bestScore = score;
@@ -286,6 +286,10 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           }
         }
         return bestPos;
+      }
+
+      function sumConstraints(constraints, pos) {
+        return _.reduce(constraints, function(sum, fn) {return sum + fn(pos);}, 0);
       }
 
     },
@@ -329,23 +333,23 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
           var transformOrigin = $interpolate('{{cx}}px {{cy}}px')({
             cx: center.x * STEP_X, cy: center.y * STEP_Y
           });
-          var transform = $interpolate('translate({{tx}}px,{{ty}}px) scale({{scale}})')({
+          var transform1 = $interpolate('translate({{tx}}px,{{ty}}px) scale({{scale}})')({
             scale: Math.min(scaleX, scaleY),
             tx: -center.x * STEP_X + wx / 2,
             ty: -center.y * STEP_Y + wy / 2
           });
           return {
             'transform-origin': transformOrigin, '-webkit-transform-origin': transformOrigin,
-            transform: transform, '-webkit-transform': transform,
+            transform: transform1, '-webkit-transform': transform1,
           };
         } else if ($scope.view === 'detail') {
           var frameLayout = $scope.arena.layout[$scope.focusedFrameKey];
-          var transform = $interpolate('translate({{tx}}px,{{ty}}px) scale(1)')({
+          var transform2 = $interpolate('translate({{tx}}px,{{ty}}px) scale(1)')({
             tx: -frameLayout.x * STEP_X + wx / 2,
             ty: -frameLayout.y * STEP_Y + wy / 2
           });
           return {
-            transform: transform, '-webkit-transform': transform,
+            transform: transform2, '-webkit-transform': transform2,
           };
         }
       }
@@ -357,19 +361,19 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
         if ($scope.view === 'detail' && frameKey === $scope.focusedFrameKey) {
           var width = Math.min(1200, wx - MARGIN_X * 2);
           var height = wy - MARGIN_Y * 2;
-          var transform = $interpolate('translate({{tx}}px,{{ty}}px)')({
+          var transform1 = $interpolate('translate({{tx}}px,{{ty}}px)')({
             tx: cx - width / 2, ty: cy - height / 2
           });
           return {
-            transform: transform, '-webkit-transform': transform,
+            transform: transform1, '-webkit-transform': transform1,
             width: width, height: height
           };
         } else {
-          var transform = $interpolate('translate({{tx}}px,{{ty}}px)')({
+          var transform2 = $interpolate('translate({{tx}}px,{{ty}}px)')({
             tx: cx - HALF_X, ty: cy - HALF_Y
           });
           return {
-            transform: transform, '-webkit-transform': transform,
+            transform: transform2, '-webkit-transform': transform2,
             width: SIZE_X, height: SIZE_Y
           };
         }
@@ -2091,11 +2095,11 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
 
 function evalAnalyzer(code, scope, analyzerUtils) {
   var mask = {scope: scope};
-  for (p in this) {
+  for (var p in this) {
     if (p !== '_' && p !== 'console') mask[p] = undefined;
   }
   mask.lf = analyzerUtils;
-  (new Function(
+  (new Function(  // jshint ignore:line
     'with(this) {' +
     'var input=scope.input, outcome=scope.outcome, triggered=scope.triggered, ' +
     'completed=scope.completed;' + code + '}'
