@@ -15,17 +15,17 @@
     "tests"
   ],
   "dependencies": {
-    "jquery-mousewheel": "~3.1.9",
     "jquery": "~2.1.0",
     "firebase": "~1.0.6",
     "firebase-simple-login": "~1.2.5",
-    "angular-latest": "~1.2.13",
     "underscore": "~1.6.0",
     "codemirror": "~3.22.0",
     "jshint": "~2.4.4",
     "Recorderjs": "mattdiamond/Recorderjs",
     "purecss": "~0.4.2",
     "normalize-css": "~3.0.0",
-    "altfire": "pkaminski/altfire"
+    "altfire": "pkaminski/altfire",
+    "fontawesome": "~4.1.0",
+    "jquery-ui": "~1.10.4"
   }
 }

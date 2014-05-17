@@ -3,33 +3,25 @@
 
 <head>
   <title>Learnful</title>
-  <script src="https://code.jquery.com/jquery-2.1.0.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular-cookies.min.js"></script>
-  <script src="https://cdn.firebase.com/v0/firebase.js"></script>
-  <script src="https://cdn.firebase.com/v0/firebase-simple-login.js"></script>
-  <script src="libs/underscore-1.6.0-min.js"></script>
-  <script src="libs/jquery-ui-1.10.4.custom.min.js"></script>
-  <!-- codemirror.js v3.22
-       css.js javascript.js python.js xml.js
-       javascript-lint.js lint.js matchbrackets.js matchtags.js placeholder.js xml-fold.js
-  -->
-  <script src="libs/codemirror-compressed.js"></script>
-  <script src="bower_components/jquery-mousewheel/jquery.mousewheel.js"></script>
-  <script src="bower_components/jshint/dist/jshint.js"></script>
-  <script src="bower_components/Recorderjs/recorder.js"></script>
-  <script src="//use.edgefonts.net/giddyup-std.js"></script>
-  <script src="bower_components/altfire/dist/altfire.min.js"></script>
-  <script src="modal.js"></script>
-  <script src="main.js"></script>
-  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css"/>
-  <link rel="stylesheet" href="libs/ui-lightness/jquery-ui-1.10.4.custom.min.css"/>
-  <link rel="stylesheet" href="bower_components/normalize-css/normalize.css">
-  <link rel="stylesheet" href="bower_components/purecss/build/pure-nr-min.css"/>
-  <link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css"/>
-  <link rel="stylesheet" href="bower_components/codemirror/addon/lint/lint.css"/>
-  <link rel="stylesheet" href="modal.css"/>
-  <link rel="stylesheet" href="main.css"/>
+
+  <!-- build:css css/libs.css -->
+  <!-- bower:css -->
+  <link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css" />
+  <link rel="stylesheet" href="bower_components/codemirror/addon/lint/lint.css" />
+  <link rel="stylesheet" href="bower_components/purecss/build/pure.css" />
+  <link rel="stylesheet" href="bower_components/normalize-css/normalize.css" />
+  <link rel="stylesheet" href="bower_components/fontawesome/css/font-awesome.css" />
+  <link rel="stylesheet" href="bower_components/jquery-ui/themes/ui-lightness/jquery-ui.css" />
+  <link rel="stylesheet" href="bower_components/jquery-ui/themes/ui-lightness/jquery.ui.theme.css" />
+  <!-- endbower -->
+  <!-- endbuild -->
+
+  <!-- build:css css/app.css -->
+  <!-- link:css -->
+  <link rel="stylesheet" href="src/main.css"/>
+  <link rel="stylesheet" href="src/modal.css"/>
+  <!-- endlink -->
+  <!-- endbuild -->
 
   <!-- favicons galore below! -->
   <link rel="apple-touch-icon" sizes="57x57" href="/favicons/apple-touch-icon-57x57.png">
@@ -59,6 +51,47 @@
   <div modal-dialog="responseEditor" disable-backdrop-cancel="on">
     <div ng-include="'partials/response_editor.html'"></div>
   </div>
+
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular-cookies.min.js"></script>
+
+  <!-- build:js js/libs.js -->
+  <!-- bower:js -->
+  <script src="bower_components/firebase/firebase.js"></script>
+  <script src="bower_components/firebase-simple-login/firebase-simple-login.js"></script>
+  <script src="bower_components/underscore/underscore.js"></script>
+  <script src="bower_components/codemirror/lib/codemirror.js"></script>
+  <script src="bower_components/codemirror/mode/css/css.js"></script>
+  <script src="bower_components/codemirror/mode/javascript/javascript.js"></script>
+  <script src="bower_components/codemirror/mode/python/python.js"></script>
+  <script src="bower_components/codemirror/mode/xml/xml.js"></script>
+  <script src="bower_components/codemirror/addon/lint/lint.js"></script>
+  <script src="bower_components/codemirror/addon/lint/javascript-lint.js"></script>
+  <script src="bower_components/codemirror/addon/edit/matchbrackets.js"></script>
+  <script src="bower_components/codemirror/addon/edit/matchtags.js"></script>
+  <script src="bower_components/codemirror/addon/display/placeholder.js"></script>
+  <script src="bower_components/codemirror/addon/fold/xml-fold.js"></script>
+  <script src="bower_components/jshint/dist/jshint.js"></script>
+  <script src="bower_components/Recorderjs/recorder.js"></script>
+  <script src="bower_components/altfire/src/altfire.js"></script>
+  <script src="bower_components/jquery-ui/ui/jquery.ui.core.js"></script>
+  <script src="bower_components/jquery-ui/ui/jquery.ui.widget.js"></script>
+  <script src="bower_components/jquery-ui/ui/jquery.ui.position.js"></script>
+  <script src="bower_components/jquery-ui/ui/jquery.ui.menu.js"></script>
+  <script src="bower_components/jquery-ui/ui/jquery.ui.autocomplete.js"></script>
+  <script src="bower_components/jquery-ui/ui/jquery.ui.tooltip.js"></script>
+  <!-- endbower -->
+  <!-- endbuild -->
+
+  <script src="//use.edgefonts.net/giddyup-std.js"></script>
+
+  <!-- build:js js/app.js -->
+  <!-- link:js -->
+  <script src="src/main.js"></script>
+  <script src="src/modal.js"></script>
+  <!-- endlink -->
+  <!-- endbuild -->
 </body>
 
 </html>
