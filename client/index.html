@@ -46,12 +46,8 @@
   <meta name="msapplication-wide310x150logo" content="/favicons/mstile-310x150.png">
 </head>
 
-<body ng-controller="lfRoot">
-  <div lf-arena="currentArenaKey"></div>
-  <div modal-dialog="responseEditor" disable-backdrop-cancel="on">
-    <div ng-include="'partials/response_editor.html'"></div>
-  </div>
-
+<body>
+  <div ng-include="'partials/root.html'"></div>
   <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular-cookies.min.js"></script>

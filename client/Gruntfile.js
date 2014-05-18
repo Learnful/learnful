@@ -2,6 +2,17 @@ module.exports = function(grunt) {
 
   require('load-grunt-tasks')(grunt);
 
+  var htmlminOptions = {
+    collapseBooleanAttributes:      true,
+    collapseWhitespace:             true,
+    removeAttributeQuotes:          true,
+    removeComments:                 true,
+    removeEmptyAttributes:          true,
+    removeRedundantAttributes:      true,
+    removeScriptTypeAttributes:     true,
+    removeStyleLinkTypeAttributes:  true
+  };
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
@@ -175,24 +186,24 @@ module.exports = function(grunt) {
         options: {
           module: 'learnful',
           usemin: 'js/app.js',
-          htmlmin: {
-            collapseBooleanAttributes:      true,
-            collapseWhitespace:             true,
-            removeAttributeQuotes:          true,
-            removeComments:                 true,
-            removeEmptyAttributes:          true,
-            removeRedundantAttributes:      true,
-            removeScriptTypeAttributes:     true,
-            removeStyleLinkTypeAttributes:  true
-          }
+          htmlmin: htmlminOptions
         }
       }
     },
+
+    htmlmin: {
+      all: {
+        options: htmlminOptions,
+        files: {
+          'dist/index.html': ['dist/index.html'],
+        }
+      }
+    }
   });
 
   grunt.registerTask('default', [
     'clean', 'jshint', 'bowerInstall', 'copy', 'sails-linker', 'useminPrepare', 'ngtemplates',
     'concat', 'ngAnnotate', 'uglify', 'cssmin', 'rev:assets', 'replace', 'usemin:css', 'usemin:js',
-    'rev:dependents', 'usemin:html'
+    'rev:dependents', 'usemin:html', 'htmlmin',
   ]);
 };
