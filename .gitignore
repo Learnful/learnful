@@ -3,3 +3,4 @@ node_modules/
 .vagrant/
 .tmp/
 dist/
+client/aws-credentials.json
