@@ -23,5 +23,5 @@ script:
 
 after_success:
   - cd client
-  - echo $AWS_CREDENTIALS >aws-credentials.json
+  - printenv AWS_CREDENTIALS >aws-credentials.json
   - s3-upload
