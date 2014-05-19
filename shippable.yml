@@ -10,7 +10,7 @@ env:
 
 before_install:
   - npm install -g grunt-cli bower pkaminski/s3-static-site-uploader
-  - npm update -g pkaminski/s3-static-site-uploader
+  - npm list -g s3-upload
 
 install:
   - cd client
