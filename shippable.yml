@@ -3,8 +3,14 @@ language: node_js
 node_js:
   - "0.10"
 
+env:
+  global:
+    # AWS_CREDENTIALS -> client/aws-credentials.json
+    - secure: D7lP2NvL1EW950BmYJmHmeV/tHCsHEFz2cYc8ja8tdbBBitUToaVxPp6IYsNlHkw4ALpEKaxqDpATEYnR+wh1+qQU7kNAFcxBXXiW0T2Y1CHVZpDuUo5RJsLqc/0p8twJZjmHMYW/lx+hrzcugo0zg+azp4JQoqUaqexWX8k7HPAwn4DG+vRecRXhjG4yGwElmv9xZKWi8/7lXK4SSQmMtDP+wYupPhAo3fPNUVI6y6to/bq4FI9BbATHRJfXT08Tn6mDMGtEUSCmC8YqZHkzAvfyzOP5vgqomrGKU9ZlZ+5gqZs98y+TdOE9amTLrL+veadXVzz/0s8GEcYoKTCgA==
+
 before_install:
-  - npm install -g grunt-cli bower
+  - npm install -g grunt-cli bower pkaminski/s3-static-site-uploader
+  - npm update -g pkaminski/s3-static-site-uploader
 
 install:
   - cd client
@@ -14,3 +20,8 @@ install:
 script:
   - cd client
   - grunt
+
+after_success:
+  - cd client
+  - echo $AWS_CREDENTIALS >aws-credentials.json
+  - s3-upload
