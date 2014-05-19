@@ -1,4 +1,4 @@
-angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
+angular.module('learnful', ['ngCookies', 'ingredients', 'altfire', 'ingredients'])
 
 .constant('config', _.extend({
   audioRecorder: {workerPath: '/bower_components/Recorderjs/recorderWorker.js'},
@@ -27,7 +27,6 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire'])
     $cookies.learnfulFakeUserId = currentUserKey = 'u' + _.random(1, 1000);
   }
   user.signIn(currentUserKey);
-  // Firebase.enableLogging(true);
 })
 
 .config(function($sceDelegateProvider, config) {

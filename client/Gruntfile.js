@@ -43,11 +43,16 @@ module.exports = function(grunt) {
           Recorderjs: {
             main: 'recorder.js'
           },
+          'angular-ingredients': {
+            main: [
+              'src/angular_ingredients.js', 'src/modal_dialog/modal.js',
+              'src/modal_dialog/modal_dialog.js'
+            ]
+          },
           codemirror: {
             main: [
               'lib/codemirror.js', 'lib/codemirror.css',
-              'mode/css/css.js', 'mode/javascript/javascript.js', 'mode/python/python.js',
-              'mode/xml/xml.js',
+              'mode/css/css.js', 'mode/javascript/javascript.js', 'mode/xml/xml.js',
               'addon/lint/lint.js', 'addon/lint/javascript-lint.js', 'addon/lint/lint.css',
               'addon/edit/matchbrackets.js', 'addon/edit/matchtags.js',
               'addon/display/placeholder.js', 'addon/fold/xml-fold.js'
