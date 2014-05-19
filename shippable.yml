@@ -19,7 +19,7 @@ install:
 
 script:
   - cd client
-  - grunt
+  - grunt dist
 
 after_success:
   - cd client

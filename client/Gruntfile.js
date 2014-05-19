@@ -13,6 +13,15 @@ module.exports = function(grunt) {
     removeStyleLinkTypeAttributes:  true
   };
 
+  var compressedFiles = {
+    assets: [
+      'dist/fonts/fontawesome-webfont.ttf', 'dist/fonts/fontawesome-webfont.svg',
+      'dist/fonts/FontAwesome.otf'
+    ],
+    css: ['dist/css/libs.css', 'dist/css/app.css'],
+    js: ['dist/js/libs.js', 'dist/js/app.js'],
+  };
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
@@ -20,16 +29,6 @@ module.exports = function(grunt) {
       all: {
         src: ['src/**/*.js'],
         jshintrc: true
-      }
-    },
-
-    clean: {
-      all: ['dist', '.tmp']
-    },
-
-    subgrunt: {
-      angular: {
-        'bower_components/angular-latest': 'minify'
       }
     },
 
@@ -74,8 +73,16 @@ module.exports = function(grunt) {
       },
       assets: {
         expand: true,
-        src: ['index.html', '*.png', 'browserconfig.xml', 'favicons/**', 'images/**'],
+        src: ['index.html', 'browserconfig.xml'],
         dest: 'dist',
+      },
+    },
+
+    imagemin: {
+      assets: {
+        expand: true,
+        src: ['*.png', 'favicons/**/*.{png,jpg,jpeg,gif}', 'images/**/*.{png,jpg,jpeg,gif}'],
+        dest: 'dist'
       },
       jqueryUiImages: {
         expand: true,
@@ -94,17 +101,6 @@ module.exports = function(grunt) {
           mangle: {toplevel: true},
         }
       },
-    },
-
-    replace: {
-      recorderWorker: {
-        src: 'dist/js/app.js',
-        overwrite: true,
-        replacements: [{
-          from: '/bower_components/Recorderjs/',
-          to: '/js/'
-        }]
-      }
     },
 
     useminPrepare: {
@@ -132,6 +128,70 @@ module.exports = function(grunt) {
       }
     },
 
+    lineending: {
+      srcIndex: {
+        files: {
+          'index.html': ['index.html']
+        }
+      },
+    },
+
+    compress: {
+      options: {
+        mode: 'gzip',
+        level: 9
+      },
+      assets: {
+        expand: true,
+        src: compressedFiles.assets,
+      },
+      css: {
+        expand: true,
+        src: compressedFiles.css,
+      },
+      js: {
+        expand: true,
+        src: compressedFiles.js,
+      },
+    },
+
+    clean: {
+      dist: ['dist', '.tmp'],
+      assets: compressedFiles.assets,
+      css: compressedFiles.css,
+      js: compressedFiles.js,
+    },
+
+    replace: {
+      css: {
+        src: 'dist/css/**/*.css',
+        overwrite: true,
+        replacements: compressedFiles.assets.map(function(filename) {
+          filename = filename.replace(/^dist\//, '');
+          return {from: filename, to: filename + '.gz'};
+        })
+      },
+      js: {
+        src: 'dist/js/app.js',
+        overwrite: true,
+        replacements: [{
+          from: '/bower_components/Recorderjs/',
+          to: '/js/'
+        }]
+      },
+      html: {
+        src: 'dist/index.html',
+        overwrite: true,
+        replacements: compressedFiles.css.map(function(filename) {
+          filename = filename.replace(/^dist\//, '');
+          return {from: filename, to: filename + '.gz'};
+        }).concat(compressedFiles.js.map(function(filename) {
+          filename = filename.replace(/^dist\//, '');
+          return {from: filename, to: filename + '.gz'};
+        }))
+      },
+    },
+
     rev: {
       assets: {
         files: [{
@@ -141,7 +201,7 @@ module.exports = function(grunt) {
       },
       dependents: {
         files: [{
-          src: ['dist/css/**/*.css', 'dist/js/**/*.js', '!dist/js/*.recorderWorker.js'],
+          src: ['dist/css/**/*.css.gz', 'dist/js/**/*.js.gz', '!dist/js/*.recorderWorker.js'],
         }]
       }
     },
@@ -201,9 +261,17 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.registerTask('default', [
-    'clean', 'jshint', 'bowerInstall', 'copy', 'sails-linker', 'useminPrepare', 'ngtemplates',
-    'concat', 'ngAnnotate', 'uglify', 'cssmin', 'rev:assets', 'replace', 'usemin:css', 'usemin:js',
-    'rev:dependents', 'usemin:html', 'htmlmin',
+  grunt.registerTask('dev', ['jshint', 'bowerInstall', 'sails-linker', 'lineending:srcIndex']);
+  grunt.registerTask('default', ['dev']);
+
+  grunt.registerTask('dist', [
+    'clean:dist', 'dev', 'copy', 'imagemin',
+    'useminPrepare', 'ngtemplates', 'concat', 'ngAnnotate', 'uglify', 'cssmin',
+    'compress:assets', 'clean:assets',
+    'rev:assets',
+    'replace:css', 'usemin:css', 'compress:css', 'clean:css',
+    'replace:js', 'usemin:js', 'compress:js', 'clean:js',
+    'rev:dependents',
+    'replace:html', 'usemin:html', 'htmlmin',
   ]);
 };
