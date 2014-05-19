@@ -6,7 +6,7 @@ node_js:
 env:
   global:
     # AWS_CREDENTIALS -> client/aws-credentials.json
-    - secure: NHHqZUwqzlHDiEtOEIJAEU07bGJm3m2S7Pfb61r9+wCmL/EvlXHZ+KMaUOUgQOPZ1Amav42asSdXcxfxw3YkJp0d6Tp7/PNlevUhFgqmyuP8nY7Tr5VBy7/YiJEgZYXhmCiDc9oUBNftE1OInibJxq+YqmbZJJhVKTqGz5EiU6LppA8tLK0CKDnL2zBu+dtQQZGafl8Ar3hqgwntVQJy69KOePcIJ04mZuafDH1Du8KPi5ljVW63WJ8FvLyi0Emc7+qj9M7mpm9VywXdsumJ7TsuN3VBe+P8cQhcGNrrHaQwnVKO86ILNP9L8u2PhzA5T2nkiPqh9ZSmqJum/btmDA==
+    - secure: X8Jk+ehN0Z1iQLaeScpSqSmHcRfvy62Ay9IKVNcC7j15mfXeroip/Yzv6VzVyzxplVAz7tImCDqgRbFEqOTAfffApm9IgubG0yMhAqDhvD3W0Ixe4ttWHXfqBx7malFMslBtrjlU3HcBmlrZzViL/EkSNADWgAIigJhqN8LhpiODKa3vXOUG7ExZQj4PQLA1COssYUtP6JCQ+XkUZrGBgp8aBGAIHwlS2pg4un0wBk1kArgL/JulojpDrxzspkuYEX1yiPPdiLmJsJRH1NPej5BfLlC4oux0chXo04M0kO5DZYmvxmB/M9nDR9MXnuDpIwoj8GYPrpVdamqEY/fQLw==
 
 before_install:
   - npm install -g grunt-cli bower pkaminski/s3-static-site-uploader
@@ -23,6 +23,5 @@ script:
 
 after_success:
   - cd client
-  - printenv AWS_CREDENTIALS
   - printenv AWS_CREDENTIALS >aws-credentials.json
   - s3-upload
