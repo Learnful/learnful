@@ -25,9 +25,4 @@ script:
   - grunt dist
 
 after_success:
-  - echo $BRANCH
-  - echo $PULL_REQUEST
-  - bash deploy.sh
-  - cd client
-  - printenv AWS_CREDENTIALS >aws-credentials.json
-  - s3-upload
+  - bash -e deploy.sh
