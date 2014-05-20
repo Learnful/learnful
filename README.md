@@ -3,8 +3,11 @@
 #### Setting up your development environment
 
 1. Install [NodeJS](https://nodejs.org/).
+
 2. `npm install -g grunt-cli bower http-server`
-3. Create a new [Firebase](https://firebase.com/) datastore (suggested name: learnful-dev-<username>).
+
+3. Create a new [Firebase](https://firebase.com/) datastore (suggested name: `learnful-dev-<username>`).
+
 4. Set up environment variables in your `.bashrc`:
 
    ```bash
@@ -23,6 +26,8 @@
     cd learnful/server
     node graph_updater.js
    ```
+   
+   Leave it running in a separate shell.
    
 7. Build and run the frontend code:
 
