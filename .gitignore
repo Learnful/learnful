@@ -4,3 +4,4 @@ node_modules/
 .tmp/
 dist/
 client/aws-credentials.json
+client/src/generated_config.js

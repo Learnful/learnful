@@ -97,6 +97,24 @@ module.exports = function(grunt) {
       },
     },
 
+    'file-creator': {
+      generatedConfig: {
+        files: {
+          'src/generated_config.js': function(fs, fd, done) {
+            if (!process.env.LEARNFUL_FIREBASE) {
+              throw new Error('Missing environment variable LEARNFUL_FIREBASE');
+            }
+            fs.writeSync(
+              fd, (
+                "angular.module('learnful.generated_config', [])" +
+                ".constant('generatedConfig', {firebase: '${LEARNFUL_FIREBASE}'});\n"
+              ).replace('${LEARNFUL_FIREBASE}', process.env.LEARNFUL_FIREBASE));
+            done();
+          }
+        }
+      }
+    },
+
     uglify: {
       recorderWorker: {
         files: {
@@ -266,7 +284,9 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.registerTask('dev', ['jshint', 'bowerInstall', 'sails-linker', 'lineending:srcIndex']);
+  grunt.registerTask('dev', [
+    'jshint', 'bowerInstall', 'file-creator', 'sails-linker', 'lineending:srcIndex'
+  ]);
   grunt.registerTask('default', ['dev']);
 
   grunt.registerTask('dist', [

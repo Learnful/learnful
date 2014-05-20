@@ -23,7 +23,8 @@
     "grunt-sails-linker": "~0.9.5",
     "grunt-contrib-compress": "~0.8.0",
     "grunt-contrib-imagemin": "~0.7.0",
-    "grunt-lineending": "~0.2.2"
+    "grunt-lineending": "~0.2.2",
+    "grunt-file-creator": "~0.1.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -5,6 +5,9 @@ node_js:
 
 env:
   global:
+    - LEARNFUL_FIREBASE=learnful
+    # LEARNFUL_FIREBASE_AUTH
+    - secure: aYAhgPWMU8Xe8XbG1s/YzDtaq5577oRu0FjPHfymo+uKNGuRF9NLWhCOVoapuvgztDmUbJKWECTiA4YlfKyolRwaiPs+g+AeAvWbNUlFakoJOW8otkF0Qp+bHe2Pv/7xuHKdawz4HdcV/QCWZ775Hf4umVVLZoWyFsB049r4qA+PrNqm5Qs3edP9K2SSq+SIwmhpSp7jjxYB8kNTf85C4MFh2kBacE5mX7pwhkGLOE9OObNWIEDqJRKcL28dpolLrdzMTBK3NHkysrDb1KrzSwjbGObOPKHYyrDn720ECeEHO+8mMPv9kIuahLJjaEY5ktBcuNw/LEdMBnAEGNiaGQ==
     # AWS_CREDENTIALS -> client/aws-credentials.json
     - secure: X8Jk+ehN0Z1iQLaeScpSqSmHcRfvy62Ay9IKVNcC7j15mfXeroip/Yzv6VzVyzxplVAz7tImCDqgRbFEqOTAfffApm9IgubG0yMhAqDhvD3W0Ixe4ttWHXfqBx7malFMslBtrjlU3HcBmlrZzViL/EkSNADWgAIigJhqN8LhpiODKa3vXOUG7ExZQj4PQLA1COssYUtP6JCQ+XkUZrGBgp8aBGAIHwlS2pg4un0wBk1kArgL/JulojpDrxzspkuYEX1yiPPdiLmJsJRH1NPej5BfLlC4oux0chXo04M0kO5DZYmvxmB/M9nDR9MXnuDpIwoj8GYPrpVdamqEY/fQLw==
 

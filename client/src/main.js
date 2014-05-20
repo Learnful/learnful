@@ -1,18 +1,19 @@
-angular.module('learnful', ['ngCookies', 'ingredients', 'altfire', 'ingredients'])
+angular.module('learnful', [
+  'ngCookies', 'ingredients', 'altfire', 'ingredients', 'learnful.generated_config'
+])
 
 .constant('config', _.extend({
   audioRecorder: {workerPath: '/bower_components/Recorderjs/recorderWorker.js'},
 }, window.location.hostname.match(/.?learnful.co$/) ? {
   prod: true,
-  firebase: 'https://learnful.firebaseio.com/',
   s3Media: 'https://s3.amazonaws.com/learnful-media.co/'
 } : {
   prod: false,
-  firebase: 'https://rebase.firebaseio.com/',
   s3Media: 'https://s3.amazonaws.com/learnful-media-dev.co/'
 }))
 
-.run(function($rootScope, $cookies, fire, config, user) {
+.run(function($rootScope, $cookies, fire, config, user, generatedConfig) {
+  _.extend(config, generatedConfig);  // Yes, we're mangling a constant.  Deal with it.
   $(document).tooltip({
     show: {delay: 500},
     content: function() {return this.getAttribute('tooltip') || this.title;},
@@ -21,7 +22,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire', 'ingredients'
   navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
     navigator.mozGetUserMedia || navigator.msGetUserMedia;
   window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
-  fire.setDefaultRoot(config.firebase);
+  fire.setDefaultRoot('https://' + config.firebase + '.firebaseio.com/');
   var currentUserKey = $cookies.learnfulFakeUserId;
   if (!currentUserKey) {
     $cookies.learnfulFakeUserId = currentUserKey = 'u' + _.random(1, 1000);
@@ -64,15 +65,15 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire', 'ingredients'
 
       $q.all(handles.arena.ready(), handles.arenaStates.ready()).then(function() {
         if (!$scope.arena) {
-            $scope.arena = {core: {
+          $scope.arena = {core: {
             ownerKey: user.currentUserKey,
-            rootFrameKey: config.prod ? 'f-JIaleLgoVqzl4oJJdUe' : 'f1'
           }};
+          if (config.prod) {
+            $scope.arena.rootFrameKey = 'f-JIaleLgoVqzl4oJJdUe';
+            $scope.arena.layout = {'f-JIaleLgoVqzl4oJJdUe': {x: 0, y: 0}};
+          }
         }
-        if (!$scope.arena.layout) {
-          $scope.arena.layout = {};
-          $scope.arena.layout[config.prod ? 'f-JIaleLgoVqzl4oJJdUe' : 'f1'] = {x: 0, y: 0};
-        }
+        if (!$scope.arena.layout) $scope.arena.layout = {};
         if (!$scope.arenaStates) $scope.arenaStates = {frames: {}};
         if ($scope.arenaStates.focusedFrameKey &&
             !$scope.arena.layout[$scope.arenaStates.focusedFrameKey]) {
@@ -1012,7 +1013,7 @@ angular.module('learnful', ['ngCookies', 'ingredients', 'altfire', 'ingredients'
 
   function uploadMedia(media, filename) {
     if (!(media && media.blob)) return $q.when(null);
-    var url = config.s3Media +
+    var url = config.s3Media + config.firebase + '/' +
       [$scope.frameKey, $scope.tidbitKey, $scope.responseKey, filename].join('/');
     var deferred = $q.defer();
     var xhr = new XMLHttpRequest();
