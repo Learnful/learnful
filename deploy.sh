@@ -2,4 +2,3 @@
 
 echo $BRANCH
 echo $PULL_REQUEST
-echo $COMMIT
