@@ -26,5 +26,9 @@ script:
 
 after_success:
   - cd client
+  - echo "branch: $BRANCH"
+  - echo "pr: $PULL_REQUEST"
+  - echo "commit: $COMMIT"
+  - ./deploy.sh
   - printenv AWS_CREDENTIALS >aws-credentials.json
   - s3-upload
