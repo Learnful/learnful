@@ -69,7 +69,7 @@ angular.module('learnful', [
             ownerKey: user.currentUserKey,
           }};
           if (config.prod) {
-            $scope.arena.rootFrameKey = 'f-JIaleLgoVqzl4oJJdUe';
+            $scope.arena.core.rootFrameKey = 'f-JIaleLgoVqzl4oJJdUe';
             $scope.arena.layout = {'f-JIaleLgoVqzl4oJJdUe': {x: 0, y: 0}};
           }
         }
