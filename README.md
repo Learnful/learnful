@@ -1,4 +1,5 @@
 ### [Learnful](https://learnful.co/): Education for Digital Natives
+[![Build Status](https://api.shippable.com/projects/537af423aae0ace700dc2b39/badge/master)](https://www.shippable.com/projects/537af423aae0ace700dc2b39)
 
 #### Setting up your development environment
 
