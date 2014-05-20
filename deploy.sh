@@ -1,5 +1,5 @@
 #!/usr/bin/bash
 
-echo "branch: $BRANCH"
-echo "pr: $PULL_REQUEST"
-echo "commit: $COMMIT"
+echo $BRANCH
+echo $PULL_REQUEST
+echo $COMMIT
