@@ -69,6 +69,12 @@ module.exports = function(grunt) {
       }
     },
 
+    subgrunt: {
+      purecss: {
+        'bower_components/purecss': 'build'
+      }
+    },
+
     copy: {
       fontAwesome: {
         expand: true,
@@ -285,7 +291,8 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('dev', [
-    'jshint', 'bowerInstall', 'file-creator', 'sails-linker', 'lineending:srcIndex'
+    'jshint', 'subgrunt:purecss', 'bowerInstall', 'file-creator', 'sails-linker',
+    'lineending:srcIndex'
   ]);
   grunt.registerTask('default', ['dev']);
 
