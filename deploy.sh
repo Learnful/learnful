@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 echo "Branch: $BRANCH; pull request: $PULL_REQUEST"
-if [[ "$BRANCH" = "master" && -z "$PULL_REQUEST" ]]; then
+if [[ "$BRANCH" = "master" && "$PULL_REQUEST" = "None" ]]; then
   echo "Deploying to production..."
   cd client
   printenv AWS_CREDENTIALS >aws-credentials.json
