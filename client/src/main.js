@@ -1890,10 +1890,12 @@ angular.module('learnful', [
   self.register = function(mediaElement, token) {
     mediaElement.on('playing', handlePlay);
     mediaElement.on('pause ended', handleStop);
-    mediaElement.attr('preload', 'none');
+    mediaElement.attr('preload', 'auto');
     if (token && token === autoplayToken) {
       autoplayToken = null;
-      mediaElement.attr('autoplay', '');
+      mediaElement.on('canplay', function(event) {
+        event.target.play();
+      });
     }
   };
 
