@@ -5,3 +5,4 @@ node_modules/
 dist/
 client/aws-credentials.json
 client/src/generated_config.js
+**/npm-debug.log

@@ -130,6 +130,12 @@ module.exports = function(grunt) {
           mangle: {toplevel: true},
         }
       },
+      generated: {
+        options: {
+          mangle: true,
+          compress: true,
+        }
+      },
     },
 
     useminPrepare: {
