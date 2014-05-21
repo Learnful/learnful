@@ -5,7 +5,7 @@ var http = require('http');
 if (process.env.NODE_ENV === 'production') {
   // Bogus server to keep Nodejitsu happy.
   var fingerprint = fs.readFileSync(__dirname + '/fingerprint');
-  console.log('Starting HTTP server, fingerprint', fingerprint);
+  console.log('Starting HTTP server, fingerprint', fingerprint.toString('ascii'));
   http.createServer(function(request, response) {
     response.writeHead(200);
     response.end(fingerprint);

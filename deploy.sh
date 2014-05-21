@@ -24,6 +24,7 @@ if [[ "$BRANCH" = "master" && "$PULL_REQUEST" = "None" ]]; then
   if [[ "$local_fingerprint" != "$remote_fingerprint" ]]; then
     echo "Fingerprint mismatch, deploying to Nodejitsu"
     echo "$fingerprint" >fingerprint
+    cat fingerprint
     echo "{\"username\": \"piotrk\", \"apiTokenName\": \"shippable\", \"apiToken\": \"$JITSU_TOKEN\"}" >~.jitsuconf
     jitsu deploy --release "0.1.0-$BUILD_NUMBER" --confirm
     rm -f fingerprint
