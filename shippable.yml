@@ -11,7 +11,7 @@ env:
     # AWS_CREDENTIALS -> client/aws-credentials.json, grab from AWS IAM for "deploy" user
     - secure: X8Jk+ehN0Z1iQLaeScpSqSmHcRfvy62Ay9IKVNcC7j15mfXeroip/Yzv6VzVyzxplVAz7tImCDqgRbFEqOTAfffApm9IgubG0yMhAqDhvD3W0Ixe4ttWHXfqBx7malFMslBtrjlU3HcBmlrZzViL/EkSNADWgAIigJhqN8LhpiODKa3vXOUG7ExZQj4PQLA1COssYUtP6JCQ+XkUZrGBgp8aBGAIHwlS2pg4un0wBk1kArgL/JulojpDrxzspkuYEX1yiPPdiLmJsJRH1NPej5BfLlC4oux0chXo04M0kO5DZYmvxmB/M9nDR9MXnuDpIwoj8GYPrpVdamqEY/fQLw==
     # JITSU_TOKEN, generate using "jitsu tokens create shippable"
-    - secure: UCpj8sPb2Xf8yYtvJsKiQyCMq3caohLexkVq/Bw+yVMJF5CiYPiipqGTdBhfnjw4k+vBz64vO/Y1iazS1muc5FMGwBbkGj67qrnCuYA3/AFM0TWGt0GJbqVOqc+BgLuloc0MddRoMwv+52ggj7OSyKkTVPCCOOso9eHf8M9N96skDAEuq2EgobRU9KbXf00LcfzFgu854lVadEoOf4LogwyJguWZnj0dgifH3kAPMKIElxJdEODA5bP2cDCCx/coIRzTO57ku8yCfts8yUBUb64L6NhEuqXeHSgTT1UVtXqRMMjGNLDT56HMyFkweP8Zzu8h8dvKMGGuZLN0l5tQSw==
+    - secure: Pk0jPpK6u5fVITtymD52PIA5L2xCK+h7uzN5WLN8+YgomzKly0r2aUWgSp0Uct9XyVLCVGpLD6Ltt+oxL8D3OoV/hXOXeO6kHrYRtlbaxcYsYLbTtDsbLz/veTrcf5J31pKuYYF2WRu45bOWQOUE60qs6aAcPt5foK9/QlrJceC6nM33cig2tdhuqDpi4yfe9S8kCZ+emm6p6YJhvPf1Q091HUrJ3UrPv99kOqHVkzaHRE2ILiTNa1+MbSCuvWFCkTNuM2eQ+WfQf298zCMj5XFk7hpnDBNi2fQqtOShG/ppSxIi32/UDOHYCMNv9tlZSB7U0XSFraIw+Be3Dpj97g==
 
 before_install:
   - npm install -g grunt-cli bower jitsu pkaminski/s3-static-site-uploader
