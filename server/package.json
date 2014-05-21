@@ -1,0 +1,31 @@
+{
+  "name": "learnful-server",
+  "version": "0.0.2",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {
+    "underscore": "~1.5.2",
+    "firebase": "~0.6.3",
+    "http": "0.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Learnful/learnful"
+  },
+  "author": "",
+  "license": "AGPLv3",
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/Learnful/learnful/issues"
+  },
+  "subdomain": "learnful-server",
+  "engines": {
+    "node": "0.10.x"
+  },
+  "analyze": false
+}

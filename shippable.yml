@@ -6,13 +6,15 @@ node_js:
 env:
   global:
     - LEARNFUL_FIREBASE=learnful
-    # LEARNFUL_FIREBASE_AUTH
+    # LEARNFUL_FIREBASE_AUTH, grab from Firebase dashboard
     - secure: aYAhgPWMU8Xe8XbG1s/YzDtaq5577oRu0FjPHfymo+uKNGuRF9NLWhCOVoapuvgztDmUbJKWECTiA4YlfKyolRwaiPs+g+AeAvWbNUlFakoJOW8otkF0Qp+bHe2Pv/7xuHKdawz4HdcV/QCWZ775Hf4umVVLZoWyFsB049r4qA+PrNqm5Qs3edP9K2SSq+SIwmhpSp7jjxYB8kNTf85C4MFh2kBacE5mX7pwhkGLOE9OObNWIEDqJRKcL28dpolLrdzMTBK3NHkysrDb1KrzSwjbGObOPKHYyrDn720ECeEHO+8mMPv9kIuahLJjaEY5ktBcuNw/LEdMBnAEGNiaGQ==
-    # AWS_CREDENTIALS -> client/aws-credentials.json
+    # AWS_CREDENTIALS -> client/aws-credentials.json, grab from AWS IAM for "deploy" user
     - secure: X8Jk+ehN0Z1iQLaeScpSqSmHcRfvy62Ay9IKVNcC7j15mfXeroip/Yzv6VzVyzxplVAz7tImCDqgRbFEqOTAfffApm9IgubG0yMhAqDhvD3W0Ixe4ttWHXfqBx7malFMslBtrjlU3HcBmlrZzViL/EkSNADWgAIigJhqN8LhpiODKa3vXOUG7ExZQj4PQLA1COssYUtP6JCQ+XkUZrGBgp8aBGAIHwlS2pg4un0wBk1kArgL/JulojpDrxzspkuYEX1yiPPdiLmJsJRH1NPej5BfLlC4oux0chXo04M0kO5DZYmvxmB/M9nDR9MXnuDpIwoj8GYPrpVdamqEY/fQLw==
+    # JITSU_TOKEN, generate using "jitsu tokens create shippable"
+    - secure: r3NDJE/7cY1W5fc0VGLKqlc6ZQgMm/VTeFXnDdapUEMeN2bbNajYm3b6OC4jEq8Mqf8FAVWVcpugaEePNt8G8O2IBYQx1HBEPN9+irOnRRX62UoPupVFjirMI1L8KMdJQW/BsgsetxeNh8dtS2Dg/nap4cFOgWkl99xaLUunb6nJm4bwO/bwQI7HJ59ZIW5hwjfWDA3M8mlbP1/UiTg7WsCR1rgh7AkFqCb9zfpYAN/P2HNlnzKpkXVRWr1v8gE7STanQKHizGOzF9IVEk8IVVWdwQSF2FQ5YVUDbNb8JcaR1U0m1hoFpH2M1AWE4n9LTkUlzlpA3+h148CCdvWP7Q==
 
 before_install:
-  - npm install -g grunt-cli bower pkaminski/s3-static-site-uploader
+  - npm install -g grunt-cli bower jitsu pkaminski/s3-static-site-uploader
   - npm list -g s3-upload
 
 install:
