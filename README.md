@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/learnful/learnful.png?label=ready&title=Ready)](https://waffle.io/learnful/learnful)
 ### [Learnful](https://learnful.co/): Education for Digital Natives
 
 ##### Deployment: [![Build Status](https://api.shippable.com/projects/537af423aae0ace700dc2b39/badge/master)](https://www.shippable.com/projects/537af423aae0ace700dc2b39) &mdash; Chat: [![Gitter chat](https://badges.gitter.im/Learnful/learnful.png)](https://gitter.im/Learnful/learnful)
