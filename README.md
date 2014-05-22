@@ -1,6 +1,6 @@
 ### [Learnful](https://learnful.co/): Education for Digital Natives
 
-Production: <a href="https://www.shippable.com/projects/537af423aae0ace700dc2b39"><img style="vertical-align: middle;" src="https://api.shippable.com/projects/537af423aae0ace700dc2b39/badge/master"/></a> &mdash; Chat: <a href="https://gitter.im/Learnful/learnful"><img style="vertical-align: middle;" src="https://badges.gitter.im/Learnful/learnful.png"/></a>
+##### Deployment: [![Build Status](https://api.shippable.com/projects/537af423aae0ace700dc2b39/badge/master)](https://www.shippable.com/projects/537af423aae0ace700dc2b39) &mdash; Chat: [![Gitter chat](https://badges.gitter.im/Learnful/learnful.png)](https://gitter.im/Learnful/learnful)
 
 #### Setting up your development environment
 
