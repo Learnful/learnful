@@ -36,8 +36,21 @@ module.exports = function(grunt) {
 
     bowerInstall: {
       all: {
-        src: ['index.html'],
-        exclude: [/jquery\.js/],
+        src: ['index.html', 'test/karma.conf.js'],
+        exclude: [/jquery\.js/, /angular\.js/, /angular-cookies\.js/, /angular-mocks\.js/],
+        fileTypes: {
+          js: {
+            block: /(([ \t]*)\/\/\s*bower:*(\S*))(\n|\r|.)*?(\/\/\s*endbower)/gi,
+            detect: {
+              js: /'(.+)',/gi,
+            },
+            replace: {
+              js: function(filePath) {
+                return '\'' + filePath.slice(3) + '\',';
+              }
+            }
+          }
+        },
         overrides: {
           jshint: {
             main: 'dist/jshint.js'
@@ -295,7 +308,13 @@ module.exports = function(grunt) {
           'dist/index.html': ['dist/index.html'],
         }
       }
-    }
+    },
+
+    karma: {
+      unit: {
+        configFile: 'test/karma.conf.js',
+      }
+    },
   });
 
   grunt.registerTask('dev', [
@@ -303,6 +322,8 @@ module.exports = function(grunt) {
     'lineending:srcIndex'
   ]);
   grunt.registerTask('default', ['dev']);
+
+  grunt.registerTask('test', ['dev', 'karma']);
 
   grunt.registerTask('dist', [
     'clean:dist', 'dev', 'copy', 'imagemin',

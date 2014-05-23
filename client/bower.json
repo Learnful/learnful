@@ -27,6 +27,9 @@
     "altfire": "pkaminski/altfire",
     "fontawesome": "~4.1.0",
     "jquery-ui": "~1.10.4",
-    "angular-ingredients": "betaorbust/angular-ingredients"
+    "angular-ingredients": "betaorbust/angular-ingredients",
+    "angular": "~1.2.16",
+    "angular-mocks": "~1.2.16",
+    "angular-cookies": "~1.2.16"
   }
 }

@@ -22,6 +22,14 @@
     "CodeMirror": false,
     "Firebase": false,
     "MediaStreamTrack": false,
-    "Recorder": false
+    "Recorder": false,
+
+    "describe": false,
+    "beforeEach": false,
+    "afterEach": false,
+    "it": false,
+    "inject": false,
+    "module": false,
+    "expect": false
   }
 }
