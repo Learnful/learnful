@@ -313,7 +313,11 @@ module.exports = function(grunt) {
     karma: {
       unit: {
         configFile: 'test/karma.conf.js',
-      }
+      },
+      once: {
+        configFile: 'test/karma.conf.js',
+        singleRun: true,
+      },
     },
   });
 
@@ -323,7 +327,8 @@ module.exports = function(grunt) {
   ]);
   grunt.registerTask('default', ['dev']);
 
-  grunt.registerTask('test', ['dev', 'karma']);
+  grunt.registerTask('test', ['dev', 'karma:unit']);
+  grunt.registerTask('testOnce', ['dev', 'karma:once']);
 
   grunt.registerTask('dist', [
     'clean:dist', 'dev', 'copy', 'imagemin',

@@ -24,7 +24,7 @@ install:
 
 script:
   - cd client
-  - grunt test
+  - grunt testOnce
   - grunt dist
 
 after_success:
