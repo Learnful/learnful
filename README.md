@@ -1,5 +1,6 @@
 ### [Learnful](https://learnful.co/): Education for Digital Natives
-[![Build Status](https://api.shippable.com/projects/537af423aae0ace700dc2b39/badge/master)](https://www.shippable.com/projects/537af423aae0ace700dc2b39)
+
+##### Deployment: [![Build Status](https://api.shippable.com/projects/537af423aae0ace700dc2b39/badge/master)](https://www.shippable.com/projects/537af423aae0ace700dc2b39) &mdash; Chat: [![Gitter chat](https://badges.gitter.im/Learnful/learnful.png)](https://gitter.im/Learnful/learnful) &mdash; [Huboard](https://huboard.com/Learnful/learnful/)
 
 #### Setting up your development environment
 
@@ -25,7 +26,8 @@
 
    ```
     cd learnful/server
-    node graph_updater.js
+    npm install
+    node main.js
    ```
    
    Leave it running in a separate shell.
@@ -34,6 +36,8 @@
 
    ```
     cd learnful/client
+    npm install
+    bower install
     grunt
     http-server
    ```
