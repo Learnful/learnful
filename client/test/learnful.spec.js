@@ -1,4 +1,4 @@
-describe('The Learnful app', function() {
+describe('learnful', function() {
   'use strict';
 
   beforeEach(function() {

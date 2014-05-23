@@ -15,20 +15,18 @@ env:
 
 before_install:
   - npm install -g grunt-cli bower jitsu pkaminski/s3-static-site-uploader
-  - npm list -g s3-upload
 
 install:
-  - cd client
-  - npm install
-  - bower install
+  - bash -e scripts/install.sh
 
 script:
-  - cd client
-  - grunt testOnce
-  - grunt dist
+  - bash -e scripts/build.sh
 
 after_success:
-  - bash -e deploy.sh
+  - bash -e scripts/deploy.sh
+
+after_script:
+  - bash -e scripts/cleanup.sh
 
 notifications:
   email:

@@ -5,7 +5,8 @@ module.exports = function(config) {
     browsers: ['PhantomJS'],
     reporters: ['progress', 'junit', 'coverage'],
     junitReporter: {
-      outputFile: '../shippable/testresults/results.xml'
+      outputFile: '../shippable/testresults/results.xml',
+      suite: 'unit',
     },
     coverageReporter: {
       type: 'cobertura',
