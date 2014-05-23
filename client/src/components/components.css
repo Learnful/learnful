@@ -1,0 +1,25 @@
+.ui-tooltip, .ui-autocomplete {
+  font-size: small;
+}
+
+input, textarea, .CodeMirror {
+  border: 1px solid #dedede;
+}
+
+.CodeMirror {
+  height: auto;
+}
+
+.CodeMirror-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.CodeMirror-empty {
+  color: #aaa;
+}
+
+.proportional-font .CodeMirror {
+  font-family: sans-serif;
+}
+

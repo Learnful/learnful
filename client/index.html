@@ -18,8 +18,15 @@
 
   <!-- build:css css/app.css -->
   <!-- link:css -->
-  <link rel="stylesheet" href="src/main.css"/>
+  <link rel="stylesheet" href="src/arena/arena.css"/>
+  <link rel="stylesheet" href="src/chat/chat.css"/>
+  <link rel="stylesheet" href="src/components/components.css"/>
+  <link rel="stylesheet" href="src/content/content.css"/>
+  <link rel="stylesheet" href="src/frame/frame.css"/>
+  <link rel="stylesheet" href="src/learnful.css"/>
+  <link rel="stylesheet" href="src/media/media.css"/>
   <link rel="stylesheet" href="src/modal.css"/>
+  <link rel="stylesheet" href="src/user/user.css"/>
   <!-- endlink -->
   <!-- endbuild -->
 
@@ -47,7 +54,7 @@
 </head>
 
 <body>
-  <div ng-include="'partials/root.html'"></div>
+  <div lf-root></div>
   <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular-cookies.min.js"></script>
@@ -86,8 +93,17 @@
 
   <!-- build:js js/app.js -->
   <!-- link:js -->
+  <script src="src/arena/arena.js"></script>
+  <script src="src/chat/chat.js"></script>
+  <script src="src/components/components.js"></script>
+  <script src="src/content/content.js"></script>
+  <script src="src/frame/frame.js"></script>
   <script src="src/generated_config.js"></script>
-  <script src="src/main.js"></script>
+  <script src="src/learnful.js"></script>
+  <script src="src/media/media.js"></script>
+  <script src="src/navigation/navigation.js"></script>
+  <script src="src/root/root.js"></script>
+  <script src="src/user/user.js"></script>
   <!-- endlink -->
   <!-- endbuild -->
 </body>

@@ -1,0 +1,11 @@
+a.tidbit-link, a.tidbit-link:visited, a.frame-link, a.frame-link:visited {
+  color: #5e9423;
+}
+
+.checkmark-true {
+  color: green;
+}
+
+.checkmark-false {
+  color: #bbb;
+}

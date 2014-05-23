@@ -1,0 +1,91 @@
+.chatroom {
+  font-size: small;
+}
+
+.chatroom .chat-presence {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 40px;
+  background-color: #fafafa;
+}
+
+.overview .chatroom .chat-presence, .neighborhood .chatroom .chat-presence {
+  bottom: 0;
+  height: 100%;
+  background-color: rgba(240,240,240,0.65);
+}
+
+.chatroom .chat-history {
+  position: absolute;
+  top: 45px;
+  bottom: 52px;
+  left: 0; right: 0;
+  overflow-y: scroll;
+}
+
+.overview .chatroom .chat-history, .neighborhood .chatroom .chat-history {
+  top: 100%; bottom: 0;
+}
+
+.chatroom .chat-input {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 47px;
+  display: flex;
+  flex-direction: row;
+}
+
+.overview .chatroom .chat-input, .overview .chatroom .chat-input > *,
+.neighborhood .chatroom .chat-input, .neighborhood .chatroom .chat-input > * {
+  height: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+
+.chatroom .chat-presence, .chatroom .chat-history, .chatroom .chat-input, .chatroom .chat-input > * {
+  transition-property: width, height, top, bottom, left, right, padding, margin, border;
+}
+
+.chatroom .chat-input textarea {
+  overflow-y: hidden;
+  font-family: sans-serif;
+  margin: 0 2px 0;
+  flex: 1 1;
+}
+
+.chatroom .message {
+  clear: left;
+  padding: 3px;
+  margin: 1px 0;
+  position: relative;
+}
+
+.chatroom .message p {
+  margin: 3px 0;
+}
+
+.chatroom .message-tidbit audio {
+  width: 225px;
+}
+
+.chatroom .avatar {
+  float: left;
+  margin-right: 5px;
+}
+
+.chatroom .tidbit-avatar {
+  filter: grayscale(1);
+  -webkit-filter: grayscale(1);
+  -moz-filter: grayscale(1);
+}
+
+.chatroom .private {
+  position: absolute;
+  top: 3px; left: 3px;
+  opacity: 0.3;
+}
+
+.chatroom .end-of-message {
+  clear: left;
+}

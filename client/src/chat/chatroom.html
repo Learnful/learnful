@@ -1,0 +1,14 @@
+<div class="chatroom">
+  <div class="chat-presence smooth">
+    <span ng-repeat="userKey in getParticipantKeys()" lf-avatar="userKey"></span>
+  </div>
+  <div class="chat-history smooth">
+    <div ng-repeat="message in getMessages()" class="message" ng-class="'message-' + message.kind"
+         ng-include="'src/chat/chatroom_message_' + message.kind + '.html'">
+    </div>
+  </div>
+  <form class="chat-input smooth pure-form" ng-submit="sendMessage()">
+    <textarea class="smooth" ng-model="userMessage" style="resize: none" lf-autocomplete="matchTidbits"></textarea>
+    <input type="submit" class="smooth pure-button" value="Send"/>
+  </form>
+</div>

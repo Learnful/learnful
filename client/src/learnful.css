@@ -1,0 +1,91 @@
+body {
+  font-family: sans-serif;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+pre {
+  margin: 0;
+}
+
+details {
+  cursor: pointer;
+}
+
+summary {
+  outline: none;
+}
+
+*, *:before, *:after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.pure-button, .icon-button {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.small-button {
+  font-size: 85%;
+  padding: .25em .5em;
+}
+
+.icon-button {
+  cursor: pointer;
+  opacity: 0.7;
+  width: 1em;
+  color: #666;
+}
+
+.icon-button[disabled], .icon-button[disabled]:hover, .icon-button[disabled]:active {
+  opacity: 0.2;
+}
+
+.icon-button[disabled] {
+  cursor: not-allowed;
+}
+
+.icon-button.on {
+  color: #ff9c81;
+}
+
+.icon-button:hover {
+  opacity: 0.85;
+}
+
+.icon-button:active {
+  opacity: 1.0;
+}
+
+.pure-button-primary {
+  background-color: #78a944;
+}
+
+.pure-button.on {
+  background-color: #ff9c81;
+}
+
+input {
+  padding: 1px 4px;
+}
+
+.top {
+  vertical-align: top;
+}
+
+.smooth {
+  transition-duration: .5s;
+  transition-timing-function: ease-in-out;
+}

@@ -1,6 +1,6 @@
 <div class="arena"
      ng-class="[view, notesToggle ? 'show-notes' : '', transition.stage ? 'transition-' + transition.stage : '']">
-  <div class="background"></div>
+  <div class="background smooth"></div>
   <div class="beta-links">
     <a href="https://docs.google.com/a/learnful.co/document/d/1eyVw3oVN1RBCNmmHryj8qtQHN64JTvAq7rCzprmNr5A/edit" target="_blank">Release notes</a> &bull;
     <a href="https://groups.google.com/a/learnful.co/forum/#!forum/pioneers" target="_blank">Discussion group</a>
@@ -24,17 +24,17 @@
       <img src="/images/notes.png"/> Notes
     </div>
   </div>
-  <div class="notes">
+  <div class="notes smooth">
     <div class="notes-text proportional-font" lf-code-editor ng-model="arena.notes"
          placeholder="A place for notes related to this workspace."></div>
-    <div class="viewport-button edit-frame icon-button fa fa-pencil"
+    <div class="viewport-button edit-frame icon-button smooth fa fa-pencil"
      ng-class="{on: arenaStates.frames[focusedFrameKey].mode &amp;&amp; arenaStates.frames[focusedFrameKey].mode !== 'explore'}"
      ng-click="toggleEdit()" title="Toggle edit mode"></div>
   </div>
-  <div class="loading">Loading...</div>
-  <div class="viewport" ng-style="viewportStyle" style="opacity: 0">
-    <canvas class="frame-connections"></canvas>
-    <div ng-repeat="(frameKey, layout) in getLayout()" class="frame-wrapper"
+  <div class="loading smooth">Loading...</div>
+  <div class="viewport smooth" ng-style="viewportStyle" style="opacity: 0">
+    <canvas class="frame-connections smooth"></canvas>
+    <div ng-repeat="(frameKey, layout) in getLayout()" class="frame-wrapper smooth"
          ng-class="{focused: focusedFrameKey === frameKey, editing: arenaStates.frames[frameKey].mode &amp;&amp; arenaStates.frames[frameKey].mode !== 'explore'}"
          ng-style="frameWrapperStyles[frameKey]">
       <div class="frame-scaler">
@@ -48,7 +48,7 @@
       </div>
     </div>
   </div>
-  <div class="viewport-button zoom-out icon-button fa fa-search-minus" ng-click="focus()"
+  <div class="viewport-button zoom-out icon-button smooth fa fa-search-minus" ng-click="focus()"
        title="Zoom back out to the workspace."></div>
   </div>
 </div>

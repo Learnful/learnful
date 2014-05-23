@@ -1,23 +1,23 @@
 <div class="frame" ng-class="[mode, focused ? 'focused' : '']">
-  <div class="title" ng-include="mode ? 'partials/frame_title_' + mode + '.html': null"></div>
+  <div class="title smooth" ng-include="mode ? 'src/frame/frame_title_' + mode + '.html': null"></div>
   <div class="main-body">
     <div class="content-wrapper">
-      <div class="content" ng-include="mode ? 'partials/frame_' + mode + '.html' : null"></div>
+      <div class="content" ng-include="mode ? 'src/frame/frame_' + mode + '.html' : null"></div>
     </div>
-    <div class="sidebar">
+    <div class="sidebar smooth">
       <h5>
         <span ng-show="mode === 'explore'">Chat</span>
         <span ng-show="mode !== 'explore'">Editor chat</span>
       </h5>
-      <div ng-if="mode === 'explore'" class="sidebar-content"
+      <div ng-if="mode === 'explore'" class="sidebar-content smooth"
            lf-chatroom frame-set="frames" frame-key="frameKey" presence="focused"
            state-user-key="stateUserKey">
       </div>
-      <div ng-if="mode !== 'explore'" class="sidebar-content"
+      <div ng-if="mode !== 'explore'" class="sidebar-content smooth"
            lf-chatroom frame-set="drafts" frame-key="frameKey" presence="focused"
            state-user-key="stateUserKey" preferred-author-key="stateUserKey">
       </div>
     </div>
   </div>
-  <div class="footer" ng-include="mode ? 'partials/frame_footer_' + mode + '.html' : null"></div>
+  <div class="footer smooth" ng-include="mode ? 'src/frame/frame_footer_' + mode + '.html' : null"></div>
 </div>

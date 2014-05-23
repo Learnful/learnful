@@ -42,7 +42,7 @@
         <td><div ng-show="tidbit.archived" class="fa fa-archive"></div></td>
       </tr>
       <tr ng-repeat-end ng-if="expandedTidbits[tidbit.$key]">
-        <td colspan="7" ng-include="'partials/frame_edit_tidbit.html'"></td>
+        <td colspan="7" ng-include="'src/frame/frame_edit_tidbit.html'"></td>
       </tr>
     </tbody>
   </table>
@@ -107,7 +107,7 @@
       <tr ng-repeat-end ng-if="expandedChildren[child.$key]">
         <td colspan="5">
           <div>Child frame ID: {{child.frameKey}}</div>
-          <div class="tidbit-details" ng-include="'partials/frame_edit_tidbit_responses.html'">
+          <div class="tidbit-details" ng-include="'src/frame/frame_edit_tidbit_responses.html'">
           </div>
         </td>
       </tr>

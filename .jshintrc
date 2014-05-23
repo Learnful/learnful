@@ -1,0 +1,27 @@
+{
+  "bitwise": true,
+  "browser": true,
+  "camelcase": true,
+  "devel": true,
+  "eqeqeq": true,
+  "indent": 2,
+  "latedef": true,
+  "maxlen": 100,
+  "newcap": true,
+  "noarg": true,
+  "quotmark": "single",
+  "strict": true,
+  "trailing": true,
+  "undef": true,
+  "unused": "vars",
+  "globals": {
+    "_": false,
+    "$": false,
+    "angular": false,
+    "AudioContext": false,
+    "CodeMirror": false,
+    "Firebase": false,
+    "MediaStreamTrack": false,
+    "Recorder": false
+  }
+}

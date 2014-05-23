@@ -26,9 +26,11 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     jshint: {
+      options: {
+        jshintrc: true
+      },
       all: {
         src: ['src/**/*.js'],
-        jshintrc: true
       }
     },
 
@@ -276,7 +278,7 @@ module.exports = function(grunt) {
 
     ngtemplates: {
       app: {
-        src: 'partials/*.html',
+        src: 'src/**/*.html',
         dest: '.tmp/ngtemplates/templates.js',
         options: {
           module: 'learnful',

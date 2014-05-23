@@ -45,3 +45,8 @@
   background-color: white;
   opacity: 0.8;
 }
+
+.dialog-buttons {
+  text-align: right;
+  margin-top: 2em;
+}
