@@ -26,7 +26,6 @@ after_success:
   - bash -e scripts/deploy.sh
 
 after_script:
-  - echo '<foo>'
   - bash -e scripts/cleanup.sh
 
 notifications:
