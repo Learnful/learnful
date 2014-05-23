@@ -12,7 +12,7 @@ angular.module('learnful', [
   s3Media: 'https://s3.amazonaws.com/learnful-media-dev.co/'
 }))
 
-.run(function($rootScope, $cookies, fire, config, user, generatedConfig) {
+.run(function run($rootScope, $cookies, fire, config, user, generatedConfig) {
   'use strict';
   _.extend(config, generatedConfig);  // Yes, we're mangling a constant.  Deal with it.
   $(document).tooltip({
@@ -31,7 +31,7 @@ angular.module('learnful', [
   user.signIn(currentUserKey);
 })
 
-.config(function($sceDelegateProvider, config) {
+.config(function cfg($sceDelegateProvider, config) {
   'use strict';
   $sceDelegateProvider.resourceUrlWhitelist([
     'self',
