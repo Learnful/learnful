@@ -1,6 +1,12 @@
 ### [Learnful](https://learnful.co/): Education for Digital Natives
 
-##### Deployment: [![Build Status](https://api.shippable.com/projects/537af423aae0ace700dc2b39/badge/master)](https://www.shippable.com/projects/537af423aae0ace700dc2b39) &mdash; Chat: [![Gitter chat](https://badges.gitter.im/Learnful/learnful.png)](https://gitter.im/Learnful/learnful) &mdash; [Huboard](https://huboard.com/Learnful/learnful/)
+##### Deployment: [![Build Status](https://api.shippable.com/projects/537af423aae0ace700dc2b39/badge/master)](https://www.shippable.com/projects/537af423aae0ace700dc2b39) &mdash; Chat: [![Gitter chat](https://badges.gitter.im/Learnful/learnful.png)](https://gitter.im/Learnful/learnful) &mdash; Tasks: [Huboard](https://huboard.com/Learnful/learnful/)
+
+* [Production site](https://learnful.co/)
+* [What's the idea behind this?](https://docs.google.com/a/learnful.co/document/d/1m7L0xPFck2LlyMUtoxK2yEF3Hd3K-7KleBRqh4GktQY/edit)
+* [Release notes](https://docs.google.com/a/learnful.co/document/d/1eyVw3oVN1RBCNmmHryj8qtQHN64JTvAq7rCzprmNr5A/edit)
+* [Discussion group](https://groups.google.com/a/learnful.co/forum/#!forum/pioneers)
+* [Contributor Licensing Agreement](https://docs.google.com/forms/d/14yvwr6CXporVvPbBPoN4Wo5MJU2CnQDCACjF4ERBdU0/viewform?usp=send_form)
 
 #### Setting up your development environment
 
