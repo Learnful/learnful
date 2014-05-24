@@ -2,4 +2,6 @@
 
 cd client
 npm install
+npm update
 bower install
+bower update
