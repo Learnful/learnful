@@ -29,9 +29,9 @@
     npm install
     node main.js
    ```
-   
+
    Leave it running in a separate shell.
-   
+
 7. Build and run the frontend code:
 
    ```
@@ -41,7 +41,7 @@
     grunt
     http-server
    ```
-   
+
    You only need to rebuild if you create or delete files in `learnful/client/src`, add or remove
    Bower components, or change the environment variables above.  Otherwise, just reload the page.
 
@@ -53,4 +53,6 @@
     http-server dist
    ```
 
-   Note that anything committed to `master` is immediately deployed to production.
+   Note that anything committed to `master` is immediately deployed to production, and that you'll
+   need to [sign a Contributor Licensing Agreement](https://docs.google.com/forms/d/14yvwr6CXporVvPbBPoN4Wo5MJU2CnQDCACjF4ERBdU0/viewform?usp=send_form)
+   before we can accept your pull request.
