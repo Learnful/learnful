@@ -1,6 +1,5 @@
 module.exports = function(config) {
   config.set({
-    basePath: '../',
     frameworks: ['jasmine'],
     browsers: ['PhantomJS'],
     reporters: ['progress', 'junit', 'coverage'],
@@ -13,14 +12,11 @@ module.exports = function(config) {
       dir: '../shippable/codecoverage/',
     },
     preprocessors: {
-      'src/**/*.js': ['coverage'],
+      'src/**/!(*.spec).js': ['coverage'],
     },
     files: [
-      'bower_components/jquery/dist/jquery.js',
-      'bower_components/angular/angular.js',
-      'bower_components/angular-cookies/angular-cookies.js',
-      'bower_components/angular-mocks/angular-mocks.js',
       // bower:js
+      'bower_components/jquery/dist/jquery.js',
       'bower_components/firebase/firebase.js',
       'bower_components/firebase-simple-login/firebase-simple-login.js',
       'bower_components/underscore/underscore.js',
@@ -36,6 +32,7 @@ module.exports = function(config) {
       'bower_components/codemirror/addon/fold/xml-fold.js',
       'bower_components/jshint/dist/jshint.js',
       'bower_components/Recorderjs/recorder.js',
+      'bower_components/angular/angular.js',
       'bower_components/altfire/src/altfire.js',
       'bower_components/jquery-ui/ui/jquery.ui.core.js',
       'bower_components/jquery-ui/ui/jquery.ui.widget.js',
@@ -46,9 +43,10 @@ module.exports = function(config) {
       'bower_components/angular-ingredients/src/angular_ingredients.js',
       'bower_components/angular-ingredients/src/modal_dialog/modal.js',
       'bower_components/angular-ingredients/src/modal_dialog/modal_dialog.js',
+      'bower_components/angular-cookies/angular-cookies.js',
       // endbower
+      'bower_components/angular-mocks/angular-mocks.js',
       'src/**/*.js',
-      'test/**/*.spec.js'
     ]
   });
 };

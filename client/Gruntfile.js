@@ -36,8 +36,8 @@ module.exports = function(grunt) {
 
     bowerInstall: {
       all: {
-        src: ['index.html', 'test/karma.conf.js'],
-        exclude: [/jquery\.js/, /angular\.js/, /angular-cookies\.js/, /angular-mocks\.js/],
+        src: ['index.html', 'karma.conf.js'],
+        exclude: [/angular-mocks\.js/],
         fileTypes: {
           js: {
             block: /(([ \t]*)\/\/\s*bower:*(\S*))(\n|\r|.)*?(\/\/\s*endbower)/gi,
@@ -45,9 +45,7 @@ module.exports = function(grunt) {
               js: /'(.+)',/gi,
             },
             replace: {
-              js: function(filePath) {
-                return '\'' + filePath.slice(3) + '\',';
-              }
+              js: '\'{{filePath}}\','
             }
           }
         },
@@ -58,11 +56,19 @@ module.exports = function(grunt) {
           Recorderjs: {
             main: 'recorder.js'
           },
+          angular: {
+            dependencies: {
+              jquery: '~2.1.1'
+            }
+          },
           'angular-ingredients': {
             main: [
               'src/angular_ingredients.js', 'src/modal_dialog/modal.js',
               'src/modal_dialog/modal_dialog.js'
-            ]
+            ],
+            dependencies: {
+              angular: '~1.2.16'
+            }
           },
           codemirror: {
             main: [
@@ -274,7 +280,7 @@ module.exports = function(grunt) {
           endTag: '<!-- endlink -->',
         },
         files: {
-          'index.html': ['src/**/*.js']
+          'index.html': ['src/**/!(*.spec).js']
         }
       },
       css: {
@@ -312,10 +318,10 @@ module.exports = function(grunt) {
 
     karma: {
       unit: {
-        configFile: 'test/karma.conf.js',
+        configFile: 'karma.conf.js',
       },
       once: {
-        configFile: 'test/karma.conf.js',
+        configFile: 'karma.conf.js',
         singleRun: true,
       },
     },
