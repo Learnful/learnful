@@ -12,6 +12,8 @@ env:
     - secure: X8Jk+ehN0Z1iQLaeScpSqSmHcRfvy62Ay9IKVNcC7j15mfXeroip/Yzv6VzVyzxplVAz7tImCDqgRbFEqOTAfffApm9IgubG0yMhAqDhvD3W0Ixe4ttWHXfqBx7malFMslBtrjlU3HcBmlrZzViL/EkSNADWgAIigJhqN8LhpiODKa3vXOUG7ExZQj4PQLA1COssYUtP6JCQ+XkUZrGBgp8aBGAIHwlS2pg4un0wBk1kArgL/JulojpDrxzspkuYEX1yiPPdiLmJsJRH1NPej5BfLlC4oux0chXo04M0kO5DZYmvxmB/M9nDR9MXnuDpIwoj8GYPrpVdamqEY/fQLw==
     # JITSU_TOKEN, generate using "jitsu tokens create shippable"
     - secure: e2wOZjrRL6LUM4nYvUVCvbINyP7jekABY5PQUKZcL6c5MMEUX7UaA6EbsD8jyRblWI3RT/Omc1zQFe4/QIjN1hcZahww24YAdSEzUu2RUH11hyFNnXeLsRjDybHgC4hBrv8h6ExWKcbECo1+1lAB1Je6Ra6bmpJM7W03eYdHWbRitGmaXSMBM1HQ6zz1Ttq80mfltch3jJwh55fQrm48Lim2wXD9NAu0NlZwtweOnagOmVRQp7VqSOCq2DKwDuzNibeWk5TXTLfPnx2icKgP+lCdmjuepevw13iaa8ZlPzVu2Vq+fqAxliPt3ptVpNU4UIn4caoalsDgnEpPOG/+zA==
+    # GITTER_URL, generate in Gitter by adding a Custom Integration
+    - secure: Xu07nLy7MPLd1Reb6pghmRVZ1RGYAwVuyur27wvkFMXnOr1jj7TqyzhfkLKftiLYagttVpEbaSg0kleIcjk4altmbh/ny16V4PZBS9cFJBFlhkv/jheT1xkzlgjQQuj84rkFHmFS2+b2lwX2FOCOsyD8bb7Ernv8LRjXCJZ6G6/+PSyXJUa5vN2NJb6YsuWW9RPPoev7qCpqNG7pZGya9GEAAbbpzg0uzG9pUnMOwqt1ZnHhuoWvkTdI9rMKNm/pzaK27qZvSBq6ewEsP34W2boQgXIEunM8Ellze+21491irWPqeyqlrF6Y2lWbYOauX+/qrvUCpcshyNygEEfSBQ==
 
 before_install:
   - npm install -g grunt-cli bower jitsu pkaminski/s3-static-site-uploader
@@ -24,6 +26,9 @@ script:
 
 after_success:
   - bash -e scripts/deploy.sh
+
+after_failure:
+  - bash -e scripts/failed.sh
 
 after_script:
   - bash -e scripts/cleanup.sh

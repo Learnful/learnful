@@ -2,6 +2,7 @@
 
 echo "Branch: $BRANCH; pull request: $PULL_REQUEST"
 if [[ "$BRANCH" = "master" && "$PULL_REQUEST" = "None" ]]; then
+  echo "{\"level\": \"error\", \"message\": \"[Build $BUILD_NUMBER](https://www.shippable.com/projects/$JOB_ID/builds/$BUILD_NUMBER) deployment failed\"}" >shippable/notification.json
   echo "Deploying to production"
 
   echo "Updating client files on S3..."
@@ -28,6 +29,7 @@ if [[ "$BRANCH" = "master" && "$PULL_REQUEST" = "None" ]]; then
     jitsu deploy --release "0.1.0-$BUILD_NUMBER" --confirm
     rm -f fingerprint
   fi
+  echo "{\"level\": \"info\", \"message\": \"[Build $BUILD_NUMBER](https://www.shippable.com/projects/$JOB_ID/builds/$BUILD_NUMBER) deployed\"}" >shippable/notification.json
 else
   echo "Not deploying"
 fi
