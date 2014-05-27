@@ -8,6 +8,8 @@
 * [Discussion group](https://groups.google.com/a/learnful.co/forum/#!forum/pioneers)
 * [Contributor Licensing Agreement](https://docs.google.com/forms/d/14yvwr6CXporVvPbBPoN4Wo5MJU2CnQDCACjF4ERBdU0/viewform?usp=send_form)
 
+Free Nodejitsu drone courtesy of their [open-source program](http://opensource.nodejitsu.com/).
+
 #### Setting up your development environment
 
 1. Install [NodeJS](https://nodejs.org/).
