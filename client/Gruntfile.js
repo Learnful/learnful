@@ -37,7 +37,6 @@ module.exports = function(grunt) {
     bowerInstall: {
       all: {
         src: ['index.html', 'karma.conf.js'],
-        exclude: [/angular-mocks\.js/],
         fileTypes: {
           js: {
             block: /(([ \t]*)\/\/\s*bower:*(\S*))(\n|\r|.)*?(\/\/\s*endbower)/gi,
