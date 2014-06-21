@@ -3,10 +3,9 @@
 ##### Deployment: [![Build Status](https://api.shippable.com/projects/537af423aae0ace700dc2b39/badge/master)](https://www.shippable.com/projects/537af423aae0ace700dc2b39) &mdash; Chat: [![Gitter chat](https://badges.gitter.im/Learnful/learnful.png)](https://gitter.im/Learnful/learnful) &mdash; Tasks: [Huboard](https://huboard.com/Learnful/learnful/)
 
 * [Production site](https://learnful.co/)
-* [What's the idea behind this?](https://docs.google.com/a/learnful.co/document/d/1m7L0xPFck2LlyMUtoxK2yEF3Hd3K-7KleBRqh4GktQY/edit)
-* [Release notes](https://docs.google.com/a/learnful.co/document/d/1eyVw3oVN1RBCNmmHryj8qtQHN64JTvAq7rCzprmNr5A/edit)
-* [Discussion group](https://groups.google.com/a/learnful.co/forum/#!forum/pioneers)
-* [Contributor Licensing Agreement](https://docs.google.com/forms/d/14yvwr6CXporVvPbBPoN4Wo5MJU2CnQDCACjF4ERBdU0/viewform?usp=send_form)
+* [What's the idea behind this?](https://github.com/Learnful/learnful/wiki)
+* [Release notes](https://github.com/Learnful/learnful/wiki/Release-notes)
+* [Contributor Licensing Agreement](https://docs.google.com/a/learnful.co/forms/d/1xJ3sa_lTyC5dzxVeIGAfGP1OBcJV1a65Tv46oK1DfWE/viewform)
 
 Free Nodejitsu drone courtesy of their [open-source program](http://opensource.nodejitsu.com/).
 
@@ -62,5 +61,5 @@ Free Nodejitsu drone courtesy of their [open-source program](http://opensource.n
    ```
 
    Note that anything committed to `master` is immediately deployed to production, and that you'll
-   need to [sign a Contributor Licensing Agreement](https://docs.google.com/forms/d/14yvwr6CXporVvPbBPoN4Wo5MJU2CnQDCACjF4ERBdU0/viewform?usp=send_form)
+   need to [sign a Contributor Licensing Agreement](https://docs.google.com/a/learnful.co/forms/d/1xJ3sa_lTyC5dzxVeIGAfGP1OBcJV1a65Tv46oK1DfWE/viewform)
    before we can accept your pull request.
