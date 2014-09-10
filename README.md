@@ -2,6 +2,8 @@
 
 ##### Deployment: [![Build Status](https://api.shippable.com/projects/537af423aae0ace700dc2b39/badge/master)](https://www.shippable.com/projects/537af423aae0ace700dc2b39) &mdash; Chat: [![Gitter chat](https://badges.gitter.im/Learnful/learnful.png)](https://gitter.im/Learnful/learnful) &mdash; Tasks: [Huboard](https://huboard.com/Learnful/learnful/)
 
+Project currently on hold.
+
 * [Production site](https://learnful.co/)
 * [What's the idea behind this?](https://github.com/Learnful/learnful/wiki)
 * [Release notes](https://github.com/Learnful/learnful/wiki/Release-notes)
