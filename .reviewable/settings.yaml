@@ -3,3 +3,5 @@ badge:
   commenter: pkaminski
 github-status:
   creator: pkaminski-test
+merge:
+  mechanism: external
