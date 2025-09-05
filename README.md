@@ -1,4 +1,4 @@
-### [Learnful](https://learnful.co/): Education for Digital Natives
+### [Learnful](https://learnful.co/): Education for Digital Naiveteeees
 
 ##### Deployment: [![Build Status](https://api.shippable.com/projects/537af423aae0ace700dc2b39/badge/master)](https://www.shippable.com/projects/537af423aae0ace700dc2b39) &mdash; Chat: [![Gitter chat](https://badges.gitter.im/Learnful/learnful.png)](https://gitter.im/Learnful/learnful) &mdash; Tasks: [Huboard](https://huboard.com/Learnful/learnful/)
 
@@ -27,6 +27,9 @@ Free Nodejitsu drone courtesy of their [open-source program](http://opensource.n
    You can find the auth secret in your Firebase datastore's dashboard, appropriately enough in the
    "Secrets" section.
 
+Big heading
+-----------
+
 5. Clone the repository onto your machine.
 
 6. Run the backend code:
@@ -51,6 +54,9 @@ Free Nodejitsu drone courtesy of their [open-source program](http://opensource.n
 
    You only need to rebuild if you create or delete files in `learnful/client/src`, add or remove
    Bower components, or change the environment variables above.  Otherwise, just reload the page.
+
+Bigger heading
+==============
 
 8. Build a client distribution:
 
