@@ -1,5 +1,7 @@
 ### [Learnful](https://learnful.co/): Education for Digital Natives
 
+(This never went anywhere)
+
 ##### Deployment: [![Build Status](https://api.shippable.com/projects/537af423aae0ace700dc2b39/badge/master)](https://www.shippable.com/projects/537af423aae0ace700dc2b39) &mdash; Chat: [![Gitter chat](https://badges.gitter.im/Learnful/learnful.png)](https://gitter.im/Learnful/learnful) &mdash; Tasks: [Huboard](https://huboard.com/Learnful/learnful/)
 
 * [Production site](https://learnful.co/)
