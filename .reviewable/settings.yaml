@@ -4,4 +4,4 @@ badge:
 github-status:
   creator: pkaminski-test
 merge:
-  mechanism: github
+  mechanism: label:Merge Me!
