@@ -1,4 +1,4 @@
-build_environment: ubuntu2404
+build_environment: ubuntu2504
 language: node_js
 node_js:
   - "0.10"
