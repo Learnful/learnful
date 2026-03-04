@@ -5,3 +5,4 @@ github-status:
   creator: pkaminski-test
 merge:
   mechanism: label:Merge Me!
+standalone-commit-types: merge
