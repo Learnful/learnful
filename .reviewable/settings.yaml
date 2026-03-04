@@ -3,4 +3,6 @@ badge:
   commenter: pkaminski
 github-status:
   creator: pkaminski-test
-standalone-commit-types: merge
+standalone-commit-types:
+  - rebase
+
