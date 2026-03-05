@@ -4,5 +4,4 @@ badge:
 github-status:
   creator: pkaminski-test
 standalone-commit-types:
-  - rebase
-
+  - merge
