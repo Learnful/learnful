@@ -1,6 +1,7 @@
 badge:
   location: comment
   commenter: pkaminski
+  when: accessed
 github-status:
   creator: pkaminski-test
 standalone-commit-types:
